@@ -27,7 +27,8 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Computer Science ML Stack
-RUN pip3 install --no-cache-dir --break-system-packages torch torchvision torchaudio opencv-python numpy
+RUN pip3 install --no-cache-dir --break-system-packages --index-url https://download.pytorch.org/whl/cu121 torch torchvision torchaudio \
+    && pip3 install --no-cache-dir --break-system-packages opencv-python numpy
 
 # Auto-source ROS 2
 RUN echo "source /opt/ros/jazzy/setup.bash" >> /root/.bashrc
