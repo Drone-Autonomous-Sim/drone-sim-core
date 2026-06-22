@@ -6,7 +6,7 @@ This repository contains the simulation infrastructure, perception network, and 
 
 Simulation: Isaac Sim
 
-Middleware: ROS2 Humble
+Middleware: ROS2 Jazzy
 
 Machine Learning: PyTorch, CUDA
 
