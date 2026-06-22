@@ -7,7 +7,7 @@ ENV ROS_DISTRO=humble
 # Install basic prerequisites
 RUN apt-get update && apt-get install -y \
     curl gnupg2 lsb-release build-essential git \
-    python3-pip python3-colcon-common-extensions \
+    python3-pip \
     wget software-properties-common locales \
     && rm -rf /var/lib/apt/lists/*
 
@@ -27,7 +27,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Computer Science ML Stack
-RUN pip3 install --no-cache-dir --break-system-packages torch torchvision torchaudio opencv-python numpy
+RUN pip3 install --no-cache-dir --break-system-packages colcon-common-extensions torch torchvision torchaudio opencv-python numpy
 
 # Auto-source ROS 2
 RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc
