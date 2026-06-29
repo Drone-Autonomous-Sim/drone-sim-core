@@ -4,7 +4,7 @@ This repository contains the simulation infrastructure, perception network, and 
 
 ## Architecture
 
-Simulation: Isaac Sim
+Simulation: Gazebo
 
 Middleware: ROS2 Jazzy
 
