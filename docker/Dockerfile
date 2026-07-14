@@ -1,4 +1,4 @@
-FROM ubuntu:24.04
+FROM nvidia/cuda:12.4-devel-ubuntu24.04
 
 # Enable NVIDIA GPU passthrough within the container
 ENV NVIDIA_VISIBLE_DEVICES=all
@@ -32,7 +32,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Computer Science ML Stack with explicit CUDA wheels
-RUN pip3 install --no-cache-dir --break-system-packages torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+RUN pip3 install --no-cache-dir --break-system-packages torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 
 # Auto-source ROS 2
 RUN echo "source /opt/ros/jazzy/setup.bash" >> /root/.bashrc
