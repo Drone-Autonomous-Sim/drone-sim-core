@@ -32,7 +32,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Computer Science ML Stack with explicit CUDA wheels
-RUN pip3 install --no-cache-dir --break-system-packages torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+RUN pip3 install --no-cache-dir --break-system-packages torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
 
 # Auto-source ROS 2
 RUN echo "source /opt/ros/jazzy/setup.bash" >> /root/.bashrc
