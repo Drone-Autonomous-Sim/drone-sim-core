@@ -1,4 +1,4 @@
-FROM ubuntu:24.04
+FROM nvidia/cuda:12.4-devel-ubuntu24.04
 
 # Enable NVIDIA GPU passthrough within the container
 ENV NVIDIA_VISIBLE_DEVICES=all
