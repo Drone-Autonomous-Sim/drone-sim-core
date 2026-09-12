@@ -2,7 +2,7 @@
 
 Welcome to the simulation repository for the Princeton University Robotics Club (PURC) Autonomous Drone Team.
 
-This repository contains our Dockerized Software-In-The-Loop (SITL) simulation environment. To ensure seamless collaboration across our team, this container provides a unified, pre-configured ROS 2 and Gazebo workspace that operates identically across Windows, macOS, and Linux distributions.
+This repository contains our Dockerized simulation environment. To ensure seamless collaboration across our team, this container provides a unified, pre-configured ROS 2 and Gazebo workspace that operates identically across Windows, macOS, and Linux distributions.
 
 This virtual testbed allows us to safely develop, compile, and validate our 3D SLAM algorithms, computer vision models, and flight control logic before deploying to our physical hardware stack (NVIDIA Jetson Orin Nano, Livox Mid-360 LiDAR, Luxonis OAK-D Lite, and Pixhawk 6X).
 
