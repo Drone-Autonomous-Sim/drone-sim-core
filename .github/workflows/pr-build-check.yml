@@ -1,0 +1,21 @@
+name: PR Build Check
+
+# Triggers the workflow only when a Pull Request targets the main branch
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-build:
+    name: Verify Docker Build
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Clone the code from the Pull Request
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Step 2: Test that the Docker image compiles without errors
+      - name: Verify Environment Compilation
+        run: docker-compose build
