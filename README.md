@@ -22,7 +22,7 @@ Once Docker is running on your machine, open your terminal and run the following
 
 ```bash
 # Clone the repository
-git clone <YOUR-REPOSITORY-URL-HERE>
+git clone <REPO-URL>
 cd drone-sim-core-main
 
 # Grant execution permissions to the script
