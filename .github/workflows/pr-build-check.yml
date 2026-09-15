@@ -18,4 +18,4 @@ jobs:
 
       # Step 2: Test that the Docker image compiles without errors
       - name: Verify Environment Compilation
-        run: docker-compose build
+        run: docker compose build
