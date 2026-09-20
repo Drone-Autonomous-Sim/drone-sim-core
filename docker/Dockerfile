@@ -29,6 +29,9 @@ RUN apt-get update && apt-get install -y \
     ros-jazzy-ros-gz \
     python3-colcon-common-extensions \
     python3-opencv \
+    mesa-utils \
+    libgl1-mesa-dri \
+    libegl1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Computer Science ML Stack with explicit CUDA wheels
