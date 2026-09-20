@@ -33,6 +33,14 @@ docker-compose build
 
 # Execute the build and run script
 ./run_docker.sh
+
+# Optional: request NVIDIA GPU passthrough on Linux/WSL2 hosts
+GPU=1 ./run_docker.sh
+
+# Optional: print the exact docker command without launching Docker/XQuartz
+SIMULATE_PLATFORM=macos DRY_RUN=1 ./run_docker.sh
+SIMULATE_PLATFORM=wsl DRY_RUN=1 ./run_docker.sh
+SIMULATE_PLATFORM=linux DRY_RUN=1 ./run_docker.sh
 ```
 > **Note:** The initial build will take several minutes as it downloads the ROS 2 base image and compiles our required dependencies.
 
