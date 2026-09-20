@@ -28,6 +28,9 @@ cd drone-sim-core-main
 # Grant execution permissions to the script
 chmod +x run_docker.sh
 
+# Compose the Docker build
+docker-compose build
+
 # Execute the build and run script
 ./run_docker.sh
 ```
