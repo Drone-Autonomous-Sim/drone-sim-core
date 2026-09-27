@@ -41,6 +41,10 @@ GPU=1 ./run_docker.sh
 SIMULATE_PLATFORM=macos DRY_RUN=1 ./run_docker.sh
 SIMULATE_PLATFORM=wsl DRY_RUN=1 ./run_docker.sh
 SIMULATE_PLATFORM=linux DRY_RUN=1 ./run_docker.sh
+
+
+# Open Gazebo
+ros2 launch ros_gz_sim gz_sim.launch.py gz_args:="empty.sdf -r"
 ```
 > **Note:** The initial build will take several minutes as it downloads the ROS 2 base image and compiles our required dependencies.
 
