@@ -14,7 +14,7 @@ To participate in our hands-on onboarding sessions, please complete these prereq
 
 ### 1. System Prerequisites
 *   **Windows Users:** Install [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install) and [Docker Desktop](https://www.docker.com/products/docker-desktop/). Ensure Docker is configured to use the WSL2 backend in the settings.
-*   **macOS Users:** Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) and [XQuartz](https://www.xquartz.org/) (required for forwarding GUI applications like Gazebo and RViz to your Mac display).
+*   **macOS Users:** Use a VM running Linux (e.g., UTM)
 *   **Linux Users:** Install [Docker Engine](https://docs.docker.com/engine/install/) and the Docker Compose plugin natively via your package manager.
 
 ### 2. Initialization
