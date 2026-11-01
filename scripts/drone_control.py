@@ -120,13 +120,14 @@ def demo(drone):
     print('DEMO PASS: takeoff, hover, translation, return, landing.', flush=True)
 
 
-def keyboard(drone):
+def keyboard(drone, speed=2.0):
     if not sys.stdin.isatty():
         raise RuntimeError('Keyboard mode needs an interactive terminal. Use --demo for automation.')
     print('T takeoff | W/S forward/back | A/D left/right | Q/E yaw\n'
           'R/F raise/lower height | SPACE hover | L land | X quit (lands first)\n'
           'Hold movement keys to move. Released keys expire after 0.35 s.\n'
           'Orange nose points forward. Click THIS terminal to control the drone.', flush=True)
+    print(f'Horizontal speed: {speed:.1f} m/s', flush=True)
     settings = termios.tcgetattr(sys.stdin)
     height, flying = drone.pose()[2], False
     movement, expires, status_at = (0., 0., 0.), 0., 0.
@@ -149,8 +150,8 @@ def keyboard(drone):
                 elif key in ('r', 'f') and flying:
                     height = max(.4, min(4., height + (.2 if key == 'r' else -.2)))
                 elif key in 'wasdqe' and flying:
-                    movement = {'w': (.6, 0., 0.), 's': (-.6, 0., 0.),
-                                'a': (0., .6, 0.), 'd': (0., -.6, 0.),
+                    movement = {'w': (speed, 0., 0.), 's': (-speed, 0., 0.),
+                                'a': (0., speed, 0.), 'd': (0., -speed, 0.),
                                 'q': (0., 0., .6), 'e': (0., 0., -.6)}[key]
                     expires = time.monotonic() + .35
             if time.monotonic() > expires:
@@ -172,7 +173,11 @@ def keyboard(drone):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--demo', action='store_true', help='Run the takeoff / move / return / land demo')
+    parser.add_argument('--speed', type=float, default=2.0,
+                        help='Keyboard horizontal speed in m/s (0 < speed <= 3; default: 2)')
     args = parser.parse_args()
+    if not math.isfinite(args.speed) or not 0 < args.speed <= 3:
+        parser.error('--speed must be greater than 0 and at most 3 m/s')
     drone = Drone()
     try:
         drone.wait()
@@ -183,7 +188,7 @@ def main():
                 drone.land()
                 raise
         else:
-            keyboard(drone)
+            keyboard(drone, args.speed)
     except (RuntimeError, KeyboardInterrupt) as exc:
         print(f'\nStopped: {exc}', file=sys.stderr)
         return 1

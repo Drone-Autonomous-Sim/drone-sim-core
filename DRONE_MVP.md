@@ -55,6 +55,11 @@ Keep keyboard focus in this terminal, not the Gazebo window:
 | L | Land and stop motors |
 | X or Ctrl+C | Land, then exit |
 
+Horizontal flight defaults to **2 m/s** (previously 0.6 m/s). To choose a speed,
+run `./control_drone.sh --speed 3` (maximum 3 m/s), or use `--speed 0.6`
+for the original pace. Restart Gazebo after updating to load the higher limit.
+Altitude, yaw, landing, and the automatic demo retain their original speeds.
+
 Hold movement keys for repeated commands. Horizontal and yaw commands expire
 after 0.35 seconds without another keypress while the controller runs. Hover
 holds altitude and commands zero horizontal velocity; it is not XY position

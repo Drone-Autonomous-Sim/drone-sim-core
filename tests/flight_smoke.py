@@ -37,6 +37,20 @@ def main():
             yaw_end = drone.pose()[3]
             delta = math.atan2(math.sin(yaw_end-yaw_start), math.cos(yaw_end-yaw_start))
             assert delta > .3, f'Yaw did not respond: {delta}'
+            # Verify actual displacement at the new default speed, not only XML limits.
+            start = time.monotonic()
+            sample = None
+            while time.monotonic() - start < 4:
+                drone.hold(1.5, x=2.0)
+                if sample is None and time.monotonic() - start > 2.5:
+                    sample = (time.monotonic(), drone.pose())
+                time.sleep(.05)
+            elapsed = time.monotonic() - sample[0]
+            end = drone.pose()
+            speed = math.hypot(end[0]-sample[1][0], end[1]-sample[1][1]) / elapsed
+            assert 1.6 < speed < 2.4, f'Unexpected horizontal speed: {speed:.2f} m/s'
+            assert abs(end[2] - 1.5) < .2, f'Altitude lost at speed: {end}'
+            print(f'PASS: measured horizontal speed {speed:.2f} m/s with altitude hold.')
             reach(drone, (0, 1, 1.5))
             drone.land()
             time.sleep(1)
