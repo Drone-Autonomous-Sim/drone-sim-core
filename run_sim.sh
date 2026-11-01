@@ -11,4 +11,10 @@ export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-xcb}"
 # Software rendering is the portable default for Apple Silicon Linux VMs.
 # Set LIBGL_ALWAYS_SOFTWARE=0 to try an accelerated Linux GPU.
 export LIBGL_ALWAYS_SOFTWARE="${LIBGL_ALWAYS_SOFTWARE:-1}"
-exec gz sim -r "$PWD/sim/drone.sdf" "$@"
+# A GUI-only client may attach to an existing server without taking its lock.
+for arg in "$@"; do
+    if [[ "$arg" == -g || "$arg" == --gui-only ]]; then
+        exec gz sim -r "$PWD/sim/drone.sdf" "$@"
+    fi
+done
+exec "$PWD/scripts/run_exclusive.sh" simulator gz sim -r "$PWD/sim/drone.sdf" "$@"

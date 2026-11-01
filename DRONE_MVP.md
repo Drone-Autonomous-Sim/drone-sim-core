@@ -75,6 +75,11 @@ From a landed start, this takes off to 1.5 m, settles, travels one metre along
 world X, returns above its starting point, and lands. It prints `DEMO PASS`
 only after reaching its targets and disabling the motors near the ground.
 
+Only one simulator and one controller may run per transport partition. The
+launch scripts reject duplicate sessions with an "already running" message;
+use the existing window or stop it first. Separate transport partitions can
+still run independently. Lock files release automatically when processes exit.
+
 Stop the controller before stopping Gazebo. To reset after a collision, stop
 both with Ctrl+C and launch again. Use only one controller at a time. If a
 controller is forcibly killed, Gazebo's built-in velocity controller retains
@@ -85,12 +90,15 @@ its last command; stop the simulator rather than leaving it unattended.
 ```bash
 source /opt/ros/jazzy/setup.bash
 gz sdf -k sim/drone.sdf
+python3 tests/test_session_guard.py
 python3 tests/flight_smoke.py
 ```
 
 The smoke test starts its own headless server in a unique Gazebo transport
 partition, exercises takeoff, hover, forward/return motion, yaw, lateral motion,
-and landing, then checks the landed altitude and cleans up its server.
+and landing, then checks the landed altitude and cleans up its server. It also
+verifies that a duplicate simulator is rejected and only one position publisher
+is present.
 
 For a manual headless run use `./run_sim.sh -s` and the same control script.
 The default transport partition is `drone_mvp`; set the same `GZ_PARTITION` in
@@ -114,6 +122,12 @@ linear velocity and yaw rate) and `/drone/enable` (`gz.msgs.Boolean`).
 
 ## Troubleshooting
 
+- **Drone jumps between positions:** older simulator processes started before
+  the session guard was added can still conflict. Stop all drone-world sessions
+  and their controllers, then launch once with `./run_sim.sh`. An empty-world
+  simulation using a different transport partition does not conflict.
+- **Already running:** use the existing simulator/controller or stop it first.
+  Do not delete active lock files to bypass the guard.
 - **No fresh odometry / drone not found:** start the simulator, leave it
   unpaused, and use the same partition for simulator and controller.
 - **Missing `gz` Python module:** source Jazzy and verify `ros-jazzy-ros-gz`

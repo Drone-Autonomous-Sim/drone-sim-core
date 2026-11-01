@@ -23,6 +23,14 @@ def main():
         try:
             drone = Drone()
             drone.wait()
+            # Regression: a second server used to interleave poses and make the drone jump.
+            duplicate = subprocess.run([str(ROOT / 'run_sim.sh'), '-s'],
+                                       capture_output=True, text=True, timeout=5)
+            assert duplicate.returncode == 73, duplicate.stderr
+            assert 'already running' in duplicate.stderr, duplicate.stderr
+            publishers, _ = drone.node.topic_info('/drone/odometry')
+            assert len(publishers) == 1, f'Expected one odometry publisher, got {len(publishers)}'
+            print('PASS: duplicate simulator rejected; exactly one position publisher.', flush=True)
             demo(drone)
             time.sleep(1)
             x, y, z, yaw = drone.pose()
