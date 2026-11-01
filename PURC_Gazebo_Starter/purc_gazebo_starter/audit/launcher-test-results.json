@@ -1,0 +1,202 @@
+[
+  {
+    "check": "Bash syntax",
+    "passed": true
+  },
+  {
+    "check": "linux GPU=0: dry-run exits successfully",
+    "passed": true
+  },
+  {
+    "check": "linux GPU=0: binds repository to /workspace",
+    "passed": true
+  },
+  {
+    "check": "linux GPU=0: correct GPU flags",
+    "passed": true
+  },
+  {
+    "check": "linux GPU=0: interactive temporary container",
+    "passed": true
+  },
+  {
+    "check": "linux GPU=1: dry-run exits successfully",
+    "passed": true
+  },
+  {
+    "check": "linux GPU=1: binds repository to /workspace",
+    "passed": true
+  },
+  {
+    "check": "linux GPU=1: correct GPU flags",
+    "passed": true
+  },
+  {
+    "check": "linux GPU=1: interactive temporary container",
+    "passed": true
+  },
+  {
+    "check": "wsl GPU=0: dry-run exits successfully",
+    "passed": true
+  },
+  {
+    "check": "wsl GPU=0: binds repository to /workspace",
+    "passed": true
+  },
+  {
+    "check": "wsl GPU=0: correct GPU flags",
+    "passed": true
+  },
+  {
+    "check": "wsl GPU=0: interactive temporary container",
+    "passed": true
+  },
+  {
+    "check": "wsl GPU=1: dry-run exits successfully",
+    "passed": true
+  },
+  {
+    "check": "wsl GPU=1: binds repository to /workspace",
+    "passed": true
+  },
+  {
+    "check": "wsl GPU=1: correct GPU flags",
+    "passed": true
+  },
+  {
+    "check": "wsl GPU=1: interactive temporary container",
+    "passed": true
+  },
+  {
+    "check": "macos GPU=0: dry-run exits successfully",
+    "passed": true
+  },
+  {
+    "check": "macos GPU=0: binds repository to /workspace",
+    "passed": true
+  },
+  {
+    "check": "macos GPU=0: correct GPU flags",
+    "passed": true
+  },
+  {
+    "check": "macos GPU=0: interactive temporary container",
+    "passed": true
+  },
+  {
+    "check": "macos GPU=1: dry-run exits successfully",
+    "passed": true
+  },
+  {
+    "check": "macos GPU=1: binds repository to /workspace",
+    "passed": true
+  },
+  {
+    "check": "macos GPU=1: correct GPU flags",
+    "passed": true
+  },
+  {
+    "check": "macos GPU=1: interactive temporary container",
+    "passed": true
+  },
+  {
+    "check": "Unknown platform fails clearly",
+    "passed": true
+  },
+  {
+    "check": "IMAGE override preserved",
+    "passed": true
+  },
+  {
+    "check": "Repository path containing spaces quoted correctly",
+    "passed": true
+  },
+  {
+    "check": "linux: rejects missing GUI",
+    "passed": true
+  },
+  {
+    "check": "linux: no Docker run on missing GUI",
+    "passed": true
+  },
+  {
+    "check": "wsl: rejects missing GUI",
+    "passed": true
+  },
+  {
+    "check": "wsl: no Docker run on missing GUI",
+    "passed": true
+  },
+  {
+    "check": "linux X11 mock: Docker status 0 preserved",
+    "passed": true
+  },
+  {
+    "check": "linux X11 mock 0: GPU requested",
+    "passed": true
+  },
+  {
+    "check": "linux X11 mock 0: access revoked",
+    "passed": true
+  },
+  {
+    "check": "linux X11 mock: Docker status 7 preserved",
+    "passed": true
+  },
+  {
+    "check": "linux X11 mock 7: GPU requested",
+    "passed": true
+  },
+  {
+    "check": "linux X11 mock 7: access revoked",
+    "passed": true
+  },
+  {
+    "check": "wsl X11 mock: Docker status 0 preserved",
+    "passed": true
+  },
+  {
+    "check": "wsl X11 mock 0: GPU requested",
+    "passed": true
+  },
+  {
+    "check": "wsl X11 mock 0: access revoked",
+    "passed": true
+  },
+  {
+    "check": "wsl X11 mock: Docker status 7 preserved",
+    "passed": true
+  },
+  {
+    "check": "wsl X11 mock 7: GPU requested",
+    "passed": true
+  },
+  {
+    "check": "wsl X11 mock 7: access revoked",
+    "passed": true
+  },
+  {
+    "check": "macOS mocked Docker status 0 preserved",
+    "passed": true
+  },
+  {
+    "check": "macOS status 0: X11 access revoked on exit",
+    "passed": true
+  },
+  {
+    "check": "macOS status 0: Docker invoked",
+    "passed": true
+  },
+  {
+    "check": "macOS mocked Docker status 7 preserved",
+    "passed": true
+  },
+  {
+    "check": "macOS status 7: X11 access revoked on exit",
+    "passed": true
+  },
+  {
+    "check": "macOS status 7: Docker invoked",
+    "passed": true
+  }
+]
