@@ -8,6 +8,16 @@ This virtual testbed allows us to safely develop, compile, and validate our 3D S
 
 ---
 
+## Drone flight MVP
+
+A self-contained quadcopter simulation is available for Ubuntu 24.04 with ROS 2 Jazzy and Gazebo Harmonic. See [DRONE_MVP.md](DRONE_MVP.md) for keyboard flight, an automatic demo, and validation.
+
+```bash
+./run_sim.sh
+# In a second Ubuntu terminal:
+./control_drone.sh
+```
+
 ## Getting Started (Pre-Meeting Setup)
 
 To participate in our hands-on onboarding sessions, please complete these prerequisites on your personal machine before the meeting:

@@ -67,3 +67,5 @@ IDEs and Editors
 *.swp
 *.swo
 *~
+# Python bytecode caches
+__pycache__/

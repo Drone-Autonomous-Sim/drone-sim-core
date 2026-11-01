@@ -1,0 +1,1089 @@
+<?xml version='1.0' encoding='utf-8'?>
+<sdf version="1.9">
+  <world name="drone_practice">
+    <gravity>0 0 -9.81</gravity>
+    <physics name="physics" type="ignored">
+      <max_step_size>0.002</max_step_size>
+      <real_time_factor>1</real_time_factor>
+    </physics>
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics" />
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands" />
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster" />
+    <scene>
+      <ambient>0.5 0.5 0.5 1</ambient>
+      <background>0.12 0.16 0.22 1</background>
+      <shadows>false</shadows>
+    </scene>
+    <light name="sun" type="directional">
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.9 0.9 0.9 1</diffuse>
+      <direction>-0.3 0.2 -1</direction>
+    </light>
+    <gui fullscreen="false">
+      <plugin filename="MinimalScene" name="3D View">
+        <gz-gui>
+          <property key="showTitleBar" type="bool">false</property>
+          <property key="state" type="string">docked</property>
+        </gz-gui>
+        <engine>ogre</engine>
+        <scene>scene</scene>
+        <ambient_light>0.5 0.5 0.5</ambient_light>
+        <background_color>0.12 0.16 0.22</background_color>
+        <camera_pose>3 -4 3 0 0.5 2.2143</camera_pose>
+      </plugin>
+      <plugin filename="GzSceneManager" name="Scene Manager">
+        <gz-gui>
+          <property key="showTitleBar" type="bool">false</property>
+          <property key="state" type="string">floating</property>
+          <property key="visible" type="bool">false</property>
+        </gz-gui>
+      </plugin>
+      <plugin filename="InteractiveViewControl" name="View Control">
+        <gz-gui>
+          <property key="showTitleBar" type="bool">false</property>
+          <property key="state" type="string">floating</property>
+          <property key="visible" type="bool">false</property>
+        </gz-gui>
+      </plugin>
+      <plugin filename="CameraTracking" name="Camera Tracking">
+        <gz-gui>
+          <property key="showTitleBar" type="bool">false</property>
+          <property key="state" type="string">floating</property>
+          <property key="visible" type="bool">false</property>
+        </gz-gui>
+      </plugin>
+    </gui>
+    <model name="practice_field">
+      <static>true</static>
+      <link name="ground">
+        <visual name="floor">
+          <pose>0 0 -0.05 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>30 30 0.1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.20 0.25 0.28 1</ambient>
+            <diffuse>0.20 0.25 0.28 1</diffuse>
+          </material>
+        </visual>
+        <collision name="floor_collision">
+          <pose>0 0 -0.05 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>30 30 0.1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="landing_pad">
+          <pose>0 0 0.004 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>1.6 1.6 0.008</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.95 0.45 0.08 1</ambient>
+            <diffuse>0.95 0.45 0.08 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_x_-10">
+          <pose>0 -10 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.012 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_y_-10">
+          <pose>-10 0 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 20 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_x_-9">
+          <pose>0 -9 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.012 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_y_-9">
+          <pose>-9 0 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 20 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_x_-8">
+          <pose>0 -8 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.012 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_y_-8">
+          <pose>-8 0 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 20 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_x_-7">
+          <pose>0 -7 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.012 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_y_-7">
+          <pose>-7 0 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 20 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_x_-6">
+          <pose>0 -6 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.012 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_y_-6">
+          <pose>-6 0 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 20 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_x_-5">
+          <pose>0 -5 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.012 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_y_-5">
+          <pose>-5 0 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 20 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_x_-4">
+          <pose>0 -4 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.012 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_y_-4">
+          <pose>-4 0 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 20 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_x_-3">
+          <pose>0 -3 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.012 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_y_-3">
+          <pose>-3 0 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 20 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_x_-2">
+          <pose>0 -2 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.012 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_y_-2">
+          <pose>-2 0 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 20 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_x_-1">
+          <pose>0 -1 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.012 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_y_-1">
+          <pose>-1 0 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 20 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_x_0">
+          <pose>0 0 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.012 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_y_0">
+          <pose>0 0 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 20 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_x_1">
+          <pose>0 1 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.012 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_y_1">
+          <pose>1 0 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 20 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_x_2">
+          <pose>0 2 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.012 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_y_2">
+          <pose>2 0 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 20 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_x_3">
+          <pose>0 3 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.012 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_y_3">
+          <pose>3 0 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 20 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_x_4">
+          <pose>0 4 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.012 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_y_4">
+          <pose>4 0 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 20 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_x_5">
+          <pose>0 5 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.012 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_y_5">
+          <pose>5 0 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 20 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_x_6">
+          <pose>0 6 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.012 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_y_6">
+          <pose>6 0 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 20 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_x_7">
+          <pose>0 7 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.012 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_y_7">
+          <pose>7 0 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 20 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_x_8">
+          <pose>0 8 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.012 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_y_8">
+          <pose>8 0 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 20 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_x_9">
+          <pose>0 9 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.012 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_y_9">
+          <pose>9 0 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 20 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_x_10">
+          <pose>0 10 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>20 0.012 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="grid_y_10">
+          <pose>10 0 0.002 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.012 20 0.002</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.35 0.40 0.43 1</ambient>
+            <diffuse>0.35 0.40 0.43 1</diffuse>
+          </material>
+        </visual>
+        <visual name="pad_mark_x">
+          <pose>0 0 0.012 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.9 0.12 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="pad_mark_y">
+          <pose>0 0 0.012 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.12 0.9 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+          </material>
+        </visual>
+        <visual name="marker_0">
+          <pose>3 3 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.3 0.3 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.1 0.65 0.8 1</ambient>
+            <diffuse>0.1 0.65 0.8 1</diffuse>
+          </material>
+        </visual>
+        <collision name="marker_0_collision">
+          <pose>3 3 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.3 0.3 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="marker_1">
+          <pose>-3 3 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.3 0.3 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.1 0.65 0.8 1</ambient>
+            <diffuse>0.1 0.65 0.8 1</diffuse>
+          </material>
+        </visual>
+        <collision name="marker_1_collision">
+          <pose>-3 3 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.3 0.3 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="marker_2">
+          <pose>-3 -3 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.3 0.3 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.1 0.65 0.8 1</ambient>
+            <diffuse>0.1 0.65 0.8 1</diffuse>
+          </material>
+        </visual>
+        <collision name="marker_2_collision">
+          <pose>-3 -3 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.3 0.3 1</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="marker_3">
+          <pose>3 -3 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.3 0.3 1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.1 0.65 0.8 1</ambient>
+            <diffuse>0.1 0.65 0.8 1</diffuse>
+          </material>
+        </visual>
+        <collision name="marker_3_collision">
+          <pose>3 -3 0.5 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.3 0.3 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+    <model name="drone">
+      <pose>0 0 0.18 0 0 0</pose>
+      <link name="base_link">
+        <inertial>
+          <mass>1.0</mass>
+          <inertia>
+            <ixx>0.02</ixx>
+            <iyy>0.02</iyy>
+            <izz>0.04</izz>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyz>0</iyz>
+          </inertia>
+        </inertial>
+        <visual name="body">
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.25 0.18 0.10</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.08 0.12 0.18 1</ambient>
+            <diffuse>0.08 0.12 0.18 1</diffuse>
+          </material>
+        </visual>
+        <collision name="body_collision">
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.25 0.18 0.10</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="nose">
+          <pose>0.14 0 0.025 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.07 0.16 0.04</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 0.35 0.05 1</ambient>
+            <diffuse>1 0.35 0.05 1</diffuse>
+          </material>
+        </visual>
+        <visual name="arm_0">
+          <pose>0 0 0 0 0 0.785398</pose>
+          <geometry>
+            <box>
+              <size>0.80 0.025 0.025</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.5 0.55 0.6 1</ambient>
+            <diffuse>0.5 0.55 0.6 1</diffuse>
+          </material>
+        </visual>
+        <collision name="arm_0_collision">
+          <pose>0 0 0 0 0 0.785398</pose>
+          <geometry>
+            <box>
+              <size>0.80 0.025 0.025</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="arm_1">
+          <pose>0 0 0 0 0 -0.785398</pose>
+          <geometry>
+            <box>
+              <size>0.80 0.025 0.025</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.5 0.55 0.6 1</ambient>
+            <diffuse>0.5 0.55 0.6 1</diffuse>
+          </material>
+        </visual>
+        <collision name="arm_1_collision">
+          <pose>0 0 0 0 0 -0.785398</pose>
+          <geometry>
+            <box>
+              <size>0.80 0.025 0.025</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="skid_0">
+          <pose>0 -0.12 -0.12 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.35 0.025 0.025</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.7 0.7 0.7 1</ambient>
+            <diffuse>0.7 0.7 0.7 1</diffuse>
+          </material>
+        </visual>
+        <collision name="skid_0_collision">
+          <pose>0 -0.12 -0.12 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.35 0.025 0.025</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="skid_1">
+          <pose>0 0.12 -0.12 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.35 0.025 0.025</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.7 0.7 0.7 1</ambient>
+            <diffuse>0.7 0.7 0.7 1</diffuse>
+          </material>
+        </visual>
+        <collision name="skid_1_collision">
+          <pose>0 0.12 -0.12 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.35 0.025 0.025</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
+      <link name="rotor_0">
+        <pose>0.25 -0.25 0.055 0 0 0</pose>
+        <inertial>
+          <mass>0.01</mass>
+          <inertia>
+            <ixx>0.0001</ixx>
+            <iyy>0.0001</iyy>
+            <izz>0.0002</izz>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyz>0</iyz>
+          </inertia>
+        </inertial>
+        <visual name="blade">
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.28 0.022 0.008</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 0.45 0.1 1</ambient>
+            <diffuse>1 0.45 0.1 1</diffuse>
+          </material>
+        </visual>
+      </link>
+      <joint name="rotor_0_joint" type="revolute">
+        <parent>base_link</parent>
+        <child>rotor_0</child>
+        <axis>
+          <xyz>0 0 1</xyz>
+          <limit>
+            <lower>-1e+16</lower>
+            <upper>1e+16</upper>
+          </limit>
+        </axis>
+      </joint>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone</robotNamespace>
+        <jointName>rotor_0_joint</jointName>
+        <linkName>rotor_0</linkName>
+        <turningDirection>ccw</turningDirection>
+        <timeConstantUp>0.0125</timeConstantUp>
+        <timeConstantDown>0.025</timeConstantDown>
+        <maxRotVelocity>900</maxRotVelocity>
+        <motorConstant>8.54858e-06</motorConstant>
+        <momentConstant>0.016</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>0</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <link name="rotor_1">
+        <pose>-0.25 0.25 0.055 0 0 0</pose>
+        <inertial>
+          <mass>0.01</mass>
+          <inertia>
+            <ixx>0.0001</ixx>
+            <iyy>0.0001</iyy>
+            <izz>0.0002</izz>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyz>0</iyz>
+          </inertia>
+        </inertial>
+        <visual name="blade">
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.28 0.022 0.008</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.1 0.7 0.9 1</ambient>
+            <diffuse>0.1 0.7 0.9 1</diffuse>
+          </material>
+        </visual>
+      </link>
+      <joint name="rotor_1_joint" type="revolute">
+        <parent>base_link</parent>
+        <child>rotor_1</child>
+        <axis>
+          <xyz>0 0 1</xyz>
+          <limit>
+            <lower>-1e+16</lower>
+            <upper>1e+16</upper>
+          </limit>
+        </axis>
+      </joint>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone</robotNamespace>
+        <jointName>rotor_1_joint</jointName>
+        <linkName>rotor_1</linkName>
+        <turningDirection>ccw</turningDirection>
+        <timeConstantUp>0.0125</timeConstantUp>
+        <timeConstantDown>0.025</timeConstantDown>
+        <maxRotVelocity>900</maxRotVelocity>
+        <motorConstant>8.54858e-06</motorConstant>
+        <momentConstant>0.016</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>1</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <link name="rotor_2">
+        <pose>0.25 0.25 0.055 0 0 0</pose>
+        <inertial>
+          <mass>0.01</mass>
+          <inertia>
+            <ixx>0.0001</ixx>
+            <iyy>0.0001</iyy>
+            <izz>0.0002</izz>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyz>0</iyz>
+          </inertia>
+        </inertial>
+        <visual name="blade">
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.28 0.022 0.008</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 0.45 0.1 1</ambient>
+            <diffuse>1 0.45 0.1 1</diffuse>
+          </material>
+        </visual>
+      </link>
+      <joint name="rotor_2_joint" type="revolute">
+        <parent>base_link</parent>
+        <child>rotor_2</child>
+        <axis>
+          <xyz>0 0 1</xyz>
+          <limit>
+            <lower>-1e+16</lower>
+            <upper>1e+16</upper>
+          </limit>
+        </axis>
+      </joint>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone</robotNamespace>
+        <jointName>rotor_2_joint</jointName>
+        <linkName>rotor_2</linkName>
+        <turningDirection>cw</turningDirection>
+        <timeConstantUp>0.0125</timeConstantUp>
+        <timeConstantDown>0.025</timeConstantDown>
+        <maxRotVelocity>900</maxRotVelocity>
+        <motorConstant>8.54858e-06</motorConstant>
+        <momentConstant>0.016</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>2</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <link name="rotor_3">
+        <pose>-0.25 -0.25 0.055 0 0 0</pose>
+        <inertial>
+          <mass>0.01</mass>
+          <inertia>
+            <ixx>0.0001</ixx>
+            <iyy>0.0001</iyy>
+            <izz>0.0002</izz>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyz>0</iyz>
+          </inertia>
+        </inertial>
+        <visual name="blade">
+          <pose>0 0 0 0 0 0</pose>
+          <geometry>
+            <box>
+              <size>0.28 0.022 0.008</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.1 0.7 0.9 1</ambient>
+            <diffuse>0.1 0.7 0.9 1</diffuse>
+          </material>
+        </visual>
+      </link>
+      <joint name="rotor_3_joint" type="revolute">
+        <parent>base_link</parent>
+        <child>rotor_3</child>
+        <axis>
+          <xyz>0 0 1</xyz>
+          <limit>
+            <lower>-1e+16</lower>
+            <upper>1e+16</upper>
+          </limit>
+        </axis>
+      </joint>
+      <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+        <robotNamespace>drone</robotNamespace>
+        <jointName>rotor_3_joint</jointName>
+        <linkName>rotor_3</linkName>
+        <turningDirection>cw</turningDirection>
+        <timeConstantUp>0.0125</timeConstantUp>
+        <timeConstantDown>0.025</timeConstantDown>
+        <maxRotVelocity>900</maxRotVelocity>
+        <motorConstant>8.54858e-06</motorConstant>
+        <momentConstant>0.016</momentConstant>
+        <commandSubTopic>command/motor_speed</commandSubTopic>
+        <actuator_number>3</actuator_number>
+        <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
+        <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+        <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
+        <motorType>velocity</motorType>
+      </plugin>
+      <plugin filename="gz-sim-multicopter-control-system" name="gz::sim::systems::MulticopterVelocityControl">
+        <robotNamespace>drone</robotNamespace>
+        <commandSubTopic>cmd_vel</commandSubTopic>
+        <enableSubTopic>enable</enableSubTopic>
+        <comLinkName>base_link</comLinkName>
+        <velocityGain>2.7 2.7 4</velocityGain>
+        <attitudeGain>2 2 0.15</attitudeGain>
+        <angularRateGain>0.4 0.4 0.18</angularRateGain>
+        <maximumLinearAcceleration>2 2 2</maximumLinearAcceleration>
+        <maximumLinearVelocity>1 1 1</maximumLinearVelocity>
+        <maximumAngularVelocity>0 0 0.8</maximumAngularVelocity>
+        <rotorConfiguration>
+          <rotor>
+            <jointName>rotor_0_joint</jointName>
+            <forceConstant>8.54858e-06</forceConstant>
+            <momentConstant>0.016</momentConstant>
+            <direction>1</direction>
+          </rotor>
+          <rotor>
+            <jointName>rotor_1_joint</jointName>
+            <forceConstant>8.54858e-06</forceConstant>
+            <momentConstant>0.016</momentConstant>
+            <direction>1</direction>
+          </rotor>
+          <rotor>
+            <jointName>rotor_2_joint</jointName>
+            <forceConstant>8.54858e-06</forceConstant>
+            <momentConstant>0.016</momentConstant>
+            <direction>-1</direction>
+          </rotor>
+          <rotor>
+            <jointName>rotor_3_joint</jointName>
+            <forceConstant>8.54858e-06</forceConstant>
+            <momentConstant>0.016</momentConstant>
+            <direction>-1</direction>
+          </rotor>
+        </rotorConfiguration>
+      </plugin>
+      <plugin filename="gz-sim-odometry-publisher-system" name="gz::sim::systems::OdometryPublisher">
+        <dimensions>3</dimensions>
+        <odom_publish_frequency>30</odom_publish_frequency>
+        <odom_topic>/drone/odometry</odom_topic>
+      </plugin>
+    </model>
+  </world>
+</sdf>
