@@ -7,7 +7,8 @@
     Gazebo/RViz windows are shown through WSLg, whose display sockets Docker Desktop
     exposes to containers under /run/desktop/mnt/host/wslg.
 
-    Build the image first (from this folder):   docker compose build
+    Build the image first (from this folder):   docker build -t purc-drone-sim ./docker
+    (If you used `docker compose build` instead, pass -Image drone-sim-core-drone_sim.)
 
     Gazebo/RViz render with Mesa software OpenGL (llvmpipe) in both modes: Docker
     Desktop's VM cannot hand the WSL DirectX (d3d12) bridge to containers, so hardware
@@ -17,7 +18,7 @@
     Pass the NVIDIA GPU through (--gpus all) for CUDA/PyTorch.
 
 .PARAMETER Image
-    Image to run. Default is what `docker compose build` produces in this folder.
+    Image to run. Default matches the README's build command (purc-drone-sim).
 
 .PARAMETER DryRun
     Print the docker command instead of running it.
@@ -35,7 +36,7 @@
 [CmdletBinding(PositionalBinding = $false)]
 param(
     [switch]$Gpu,
-    [string]$Image = "drone-sim-core-drone_sim",
+    [string]$Image = "purc-drone-sim",
     [switch]$DryRun,
     [Parameter(ValueFromRemainingArguments = $true)]
     [string[]]$Command = @("bash")
