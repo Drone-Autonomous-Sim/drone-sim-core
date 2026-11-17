@@ -334,6 +334,7 @@ Each of those `gz topic` lines has the same three parts: `-t` is the topic, whic
 
 Change a number in the script, run it again, watch what happens: every later step in this guide starts the same way.
 
+### If It Does Not Work
 > **If X3 is already in the air**, land it first (Step 6.6); the script assumes it starts on the ground.
 > **If the script stops partway**, send the hover command from Step 6.5, land, and re-run.
 
@@ -347,19 +348,24 @@ So far you have talked to Gazebo directly. That is fine for one drone in a simul
 
 Gazebo has its own topics, the ones you used in Step 6, and ROS 2 cannot see them. A small program called the **bridge** copies messages between the two systems and converts the message type on the way. The file `sim/bridge/x3.yaml` tells it which three topics to copy and what to call each on the ROS side. Here is what this step builds, left to right:
 
-```text
-+-------------------------+     +---------------------+     +-------------------------------+
-|  ROS 2 side (Terminal C)|     |       bridge        |     |   Gazebo side (Terminal A)    |
-|                         |     |                     |     |                               |
-|  ros2 topic pub  -------+---->|  Twist  ->  Twist   +---->|  /X3/gazebo/command/twist     |
-|    to /x3/cmd_vel       |     |                     |     |    X3 moves                   |
-|                         |     |                     |     |                               |
-|  ros2 topic echo <------+-----+ Odometry <- Odometry|<----+  /model/x3/odometry           |
-|    on /x3/odom          |     |                     |     |    X3 reports its position    |
-|                         |     |                     |     |                               |
-+-------------------------+     +---------------------+     +-------------------------------+
- topic names: ours to            copies every message,       topic names: fixed by
- choose (in x3.yaml)             converts its type           the world file
+```mermaid
+flowchart LR
+    subgraph ros["ROS 2 side (Terminal C)"]
+        pub["ros2 topic pub"]
+        echo["ros2 topic echo"]
+    end
+    subgraph bridge["bridge (Terminal B)"]
+        b1["converts Twist"]
+        b2["converts Odometry"]
+    end
+    subgraph gz["Gazebo side (Terminal A)"]
+        twist["/X3/gazebo/command/twist"]
+        odom["/model/x3/odometry"]
+        moves["X3 moves"]
+        pos["X3 position"]
+    end
+    pub -- "/x3/cmd_vel" --> b1 --> twist --> moves
+    pos --> odom --> b2 -- "/x3/odom" --> echo
 ```
 
 1. In Terminal B, start the bridge and leave it running:
@@ -399,6 +405,7 @@ Open `sim/bridge/x3.yaml`. Each entry has five fields: the ROS-side name, the Ga
 
 The point of the whole step: `/x3/cmd_vel` is now a ROS 2 topic, so **any ROS 2 program that publishes a Twist to it flies the drone**.
 
+### If It Does Not Work
 > **`ros2 topic pub` just sits there** saying it is waiting for a subscriber: the bridge is not running. Check Terminal B.
 > **`ros2 topic list` shows nothing** or only `/parameter_events` and `/rosout`: Terminal C was not sourced, or the bridge is not running. Sourcing is what makes the `ros2` commands exist in a terminal, and it has to be done in every new one.
 
@@ -428,6 +435,7 @@ Open `sim/nodes/hover.py`. It is 50 lines, and its shape is the shape of every R
 
 That is the same skeleton as the official [publisher tutorial](https://docs.ros.org/en/jazzy/Tutorials/Beginner-Client-Libraries/Writing-A-Simple-Py-Publisher-And-Subscriber.html), with a drone instead of a string message. Change the `50` to `100` and X3 climbs twice as high. Move the `0.3` from `cmd.linear.z` to `cmd.linear.x` and it goes forward instead of up. Every later node adds to this skeleton; none replaces it.
 
+### If It Does Not Work
 > **`ModuleNotFoundError: No module named 'rclpy'`:** Terminal C was not sourced. Run `source /opt/ros/jazzy/setup.bash` and try again.
 > **The node runs but X3 does not move:** the bridge is not running in Terminal B, or Gazebo is paused.
 
@@ -456,6 +464,7 @@ Open `sim/nodes/altitude_hold.py`. Compared with `hover.py`, two things are new.
 
 Two numbers to play with: `TARGET` (try 1.0 or 3.0) and `GAIN` (try 3.0, and watch it overshoot and wobble before settling). Those two experiments are most of what a controls course teaches in its first week.
 
+### If It Does Not Work
 > **The node prints nothing:** it has not received a position yet. Check the bridge is running and that `ros2 topic echo --once /x3/odom` shows data.
 > **X3 climbs past the target and keeps going:** `GAIN` is negative or the bridge is sending stale data. Reset both numbers to the values in the file.
 
