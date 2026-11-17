@@ -353,18 +353,29 @@ So `-t /X3/gazebo/command/twist` is *where*, `-m gz.msgs.Twist` is *what kind*, 
 
 **Where:** Terminal B (Inside Docker) for the bridge, plus a new **Terminal C** opened the same way as Step 5. Drone world open in Terminal A, X3 on the ground.
 
-So far you have talked to Gazebo directly. The team's real software will be written in **ROS 2**, which has its own topics that Gazebo cannot see. The ROS 2 documentation describes topics this way:
+So far you have talked to Gazebo directly. That is fine for one drone in a simulator. The real drone's software will be several programs that have to talk to each other: one reading the lidar, one building a map, one planning a path, one talking to the flight controller. **ROS 2** is the system those programs use to talk. Its two core ideas, in the documentation's words:
+
+> "Each node in ROS should be responsible for a single, modular purpose, e.g. controlling the wheel motors."
+> — ROS 2 docs, [Understanding nodes](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Nodes/Understanding-ROS2-Nodes.html)
 
 > "Topics are a vital element of the ROS graph that act as a bus for nodes to exchange messages."
 > — ROS 2 docs, [Understanding topics](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Topics/Understanding-ROS2-Topics.html)
 
-A small program called the **bridge** copies messages between the two systems:
+So a **node** is one program with one job, and a **topic** is a named channel. Nodes *publish* messages to topics and *subscribe* to topics, and never need to know who is on the other end. That last part is why the team bothers: the map-building node will subscribe to a lidar topic, and it will not care whether the lidar is simulated or real.
+
+Gazebo has its own topics (the ones you used in Step 6) that ROS 2 cannot see. A small program called the **bridge** copies messages between the two:
 
 > "`ros_gz_bridge` provides a network bridge which enables the exchange of messages between ROS 2 and Gazebo Transport."
 > "The configuration file is a YAML file that contains the mapping between the ROS and Gazebo topics to be bridged."
 > — Gazebo docs, [ROS 2 integration](https://gazebosim.org/docs/harmonic/ros2_integration/)
 
-The file `sim/bridge/x3.yaml` is that configuration: three topics, with what to call each on the ROS side.
+The file `sim/bridge/x3.yaml` is that configuration: three topics, with what to call each on the ROS side. Here is what this step builds, left to right:
+
+```text
+Terminal C                    bridge                             Gazebo
+ros2 topic pub  --->  /x3/cmd_vel  --->  /X3/gazebo/command/twist  --->  X3 moves
+ros2 topic echo <---  /x3/odom     <---  /model/x3/odometry        <---  X3 position
+```
 
 1. In Terminal B, start the bridge and leave it running:
    ```bash
@@ -428,15 +439,12 @@ The ROS-side names (`/x3/...`) are ours to choose; the Gazebo-side names are fix
 
 **Where:** Terminal C (Inside Docker), with the world open in Terminal A, the bridge from Step 10 running in Terminal B, and X3 on the ground.
 
-Everything so far was typed by hand. A ROS 2 program that sends those messages itself is called a **node**:
+Everything so far was typed by hand. A ROS 2 program that sends those messages itself is a **node**, the "one program, one job" idea from Step 10:
 
 > "Nodes are typically the unit of computation in a ROS graph; each node should do one logical thing."
 > — ROS 2 docs, [About nodes](https://docs.ros.org/en/jazzy/Concepts/Basic/About-Nodes.html)
 
-> "Each node in ROS should be responsible for a single, modular purpose, e.g. controlling the wheel motors."
-> — ROS 2 docs, [Understanding nodes](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Nodes/Understanding-ROS2-Nodes.html)
-
-The repo has one whose single purpose is: arm X3, climb for 5 seconds, then hover.
+The repo has one whose one job is: arm X3, climb for 5 seconds, then hover.
 ```bash
 python3 /workspace/sim/nodes/hover.py
 ```
