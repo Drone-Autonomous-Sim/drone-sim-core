@@ -328,11 +328,11 @@ bash /workspace/sim/scripts/fly_x3.sh
 * X3 arms, climbs, hovers, flies forward, turns left, descends to the floor, and switches its motors off. The whole flight takes about 30 seconds.
 
 ### Read the Script
-Open `sim/scripts/fly_x3.sh` in any editor. It is under 50 lines, half of them comments, and every `gz topic` line is one you typed in Step 6. The only new idea is `move`, a three-line shortcut so the velocity command is written once instead of six times.
+Open `sim/scripts/fly_x3.sh` in any editor. It is under 50 lines, half of them comments, and every `gz topic` line is one you shuold have typed in Step 6. The only new idea is `move`, a three-line shortcut so the velocity command is written once instead of six times.
 
-Each of those `gz topic` lines has the same three parts: `-t` is the topic, which is just a name for a channel of messages; `-m` is the message type; `-p` is the message's contents. So `-t /X3/gazebo/command/twist` says *where*, `-m gz.msgs.Twist` says *what kind*, and `-p 'linear: {...}'` gives *the values*. Gazebo's own walkthrough of that command is the [Moving the robot](https://gazebosim.org/docs/harmonic/moving_robot/) page, five minutes well spent.
+Each of those `gz topic` lines has the same three parts: `-t` is the topic, which is just a name for a channel of messages; `-m` is the message type; `-p` is the message's contents. So `-t /X3/gazebo/command/twist` says *where*, `-m gz.msgs.Twist` says *what kind*, and `-p 'linear: {...}'` gives *the values*. Look at Gazebo's own walkthrough of that command: [Moving the robot](https://gazebosim.org/docs/harmonic/moving_robot/) page, pretty short and useful.
 
-Change a number in the script, run it again, watch what happens: every later step in this guide starts the same way.
+Change a number in the script, run it again, watch what happens
 
 ### If It Does Not Work
 > **If X3 is already in the air**, land it first (Step 6.6); the script assumes it starts on the ground.
@@ -344,9 +344,11 @@ Change a number in the script, run it again, watch what happens: every later ste
 
 **Where:** Terminal B (Inside Docker) for the bridge, plus a new **Terminal C** opened the same way as Step 5. Drone world open in Terminal A, X3 on the ground.
 
-So far you have talked to Gazebo directly. That is fine for one drone in a simulator. The real drone's software will be several programs that have to talk to each other: one reading the lidar, one building a map, one planning a path, one talking to the flight controller. If each of those had to know how to connect to every other, adding or replacing one would mean changing all of them, and swapping the simulated lidar for the real one would mean rewriting the map builder. **ROS 2** is the standard way robotics software avoids that. It has two core ideas. A **node** is one program with one job. A **topic** is a named channel; nodes *publish* messages to topics and *subscribe* to topics, and never need to know who is on the other end. So the map-building node subscribes to a lidar topic and does not care whether the lidar is simulated or real. (The ROS 2 docs introduce both in [Understanding nodes](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Nodes/Understanding-ROS2-Nodes.html) and [Understanding topics](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Topics/Understanding-ROS2-Topics.html).)
+So far you have talked to Gazebo directly. That is fine for one drone in a simulator. The real drone's software will be several programs that have to talk to each other: one reading the lidar, one building a map, one planning a path, one talking to the flight controller. If each of those parts had to know and coordinate how to connect to every other, adding or replacing one would mean changing all of them. This work can get pretty cumbersome. For eg, swapping the simulated lidar for the real one would mean rewriting the map builder. This is because the real lidar collects data in a sweeping line, completely different from the simulation, which assumes the lidar data arrives all at once. 
 
-Gazebo has its own topics, the ones you used in Step 6, and ROS 2 cannot see them. A small program called the **bridge** copies messages between the two systems and converts the message type on the way. The file `sim/bridge/x3.yaml` tells it which three topics to copy and what to call each on the ROS side. Here is what this step builds, left to right:
+So **ROS 2** is the standard way robotics software avoids that. It has two core ideas. A **node** is one program with one job (for example, processing and making a point cloud out of a lidar input, simulated or real). A **topic** is a named channel; nodes *publish* messages to topics and *subscribe* to topics they need to get info from other nodes. Notice that this way each node never needs to know who is on the other end and think about messaging policies. So, for example, a map-building node subscribes to a lidar topic and does not care whether the lidar is simulated or real. This makes it much easier to swap out simulated and real lidar processing programs from the prev. example. (The ROS 2 docs introduce both in [Understanding nodes](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Nodes/Understanding-ROS2-Nodes.html) and [Understanding topics](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Topics/Understanding-ROS2-Topics.html).)
+
+Gazebo has its own concepts of topics, the ones you used in Step 6. But ROS 2 topics are not the same, and they can't see each other. So a small program called the **bridge** copies messages between the two systems and converts the message type on the way. The file `sim/bridge/x3.yaml` tells it which three topics to copy and what to call each on the ROS side. Here is what this step builds (left to right):
 
 ```mermaid
 flowchart LR
@@ -374,8 +376,8 @@ What each name in the picture is, left to right:
 | :--- | :--- |
 | `ros2 topic pub` | Command that sends one message to a ROS 2 topic. You type it. |
 | `ros2 topic echo` | Command that prints the messages arriving on a ROS 2 topic. |
-| `/x3/cmd_vel` | ROS 2 topic for velocity commands. "cmd_vel" is the usual ROS name for this. Ours to name. |
-| `/x3/odom` | ROS 2 topic carrying the drone's odometry: its estimate of where it is and how fast it moves. Ours to name. |
+| `/x3/cmd_vel` | ROS 2 topic for velocity commands. "cmd_vel" is the usual ROS name for this. Can be named anything though (this applies to all topic names. need to decide once then fix) |
+| `/x3/odom` | ROS 2 topic carrying the drone's odometry: its estimate of where it is and how fast it moves. |
 | bridge | The `ros_gz_bridge` program. Takes each message from one side, converts it to the other side's type, and re-sends it. |
 | Twist | Message type for a velocity: linear (x, y, z) and angular (turn) parts. |
 | Odometry | Message type for a position plus velocity estimate. |
@@ -413,7 +415,7 @@ What each name in the picture is, left to right:
    ```
 
 ### What the Commands Mean
-`ros2 topic pub` is the ROS 2 twin of `gz topic -p`: topic name, message type, then the message as YAML. `--once` means publish one message and exit. Any field you leave out is zero, which is why `"{}"` is the hover command. The two message types are standard ROS ones: a `Twist` is a velocity split into linear and angular parts, and an `Odometry` is an estimate of position and velocity. Their definitions are one short file each, [Twist.msg](https://github.com/ros2/common_interfaces/blob/jazzy/geometry_msgs/msg/Twist.msg) and [Odometry.msg](https://github.com/ros2/common_interfaces/blob/jazzy/nav_msgs/msg/Odometry.msg).
+`ros2 topic pub` is the ROS 2 twin of `gz topic -p`: topic name, message type, then the message as YAML. `--once` means publish one message and exit. Any field you leave out is zero, which is why `"{}"` is the hover command. The two message types are standard ROS ones: a `Twist` is a velocity split into linear and angular parts, and an `Odometry` is an estimate of position and velocity. Their definitions are these short file: [Twist.msg](https://github.com/ros2/common_interfaces/blob/jazzy/geometry_msgs/msg/Twist.msg) and [Odometry.msg](https://github.com/ros2/common_interfaces/blob/jazzy/nav_msgs/msg/Odometry.msg).
 
 ### Read the Config
 Open `sim/bridge/x3.yaml`. Each entry has five fields: the ROS-side name, the Gazebo-side name, the two message types, and `direction`, which is `ROS_TO_GZ`, `GZ_TO_ROS` or `BIDIRECTIONAL`. The ROS-side names (`/x3/...`) are ours to choose; the Gazebo-side names are fixed by the world file; `cmd_vel` is the name ROS programs conventionally use for a velocity command. The full list of fields is in the [ros_gz_bridge README](https://github.com/gazebosim/ros_gz/blob/ros2/ros_gz_bridge/README.md).
@@ -430,7 +432,7 @@ The point of the whole step: `/x3/cmd_vel` is now a ROS 2 topic, so **any ROS 2 
 
 **Where:** Terminal C (Inside Docker), with the world open in Terminal A, the bridge from Step 10 running in Terminal B, and X3 on the ground.
 
-Everything so far was typed by hand. A ROS 2 program that sends those messages itself is a **node**, the "one program, one job" idea from Step 10. The repo has one whose one job is: arm X3, climb for 5 seconds, then hover.
+Everything so far was typed manually. A ROS 2 program that sends those messages itself is a **node**, the "one program, one job" idea from Step 10. The repo has one whose one job is: arm X3, climb for 5 seconds, then hover.
 ```bash
 python3 /workspace/sim/nodes/hover.py
 ```
