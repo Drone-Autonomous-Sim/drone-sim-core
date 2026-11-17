@@ -16,6 +16,7 @@ Welcome to the PURC Drone Simulation guide! Use this repository and walkthrough 
 - [Step 9: Fly the Same Pattern From a Script](#step-9-fly-the-same-pattern-from-a-script)
 - [Step 10: Fly From ROS 2](#step-10-fly-from-ros-2)
 - [Step 11: Your First ROS 2 Node](#step-11-your-first-ros-2-node)
+- [Step 12: Hold a Height Using Feedback](#step-12-hold-a-height-using-feedback)
 - [First-Flight Checklist](#first-flight-checklist)
 - [Troubleshooting](#troubleshooting)
 - [Optional: Open the Sensor Lab](#optional-open-the-sensor-lab)
@@ -400,6 +401,30 @@ Change the `50` to `100` and X3 climbs twice as high. Move the `0.3` from `cmd.l
 > **`ModuleNotFoundError: No module named 'rclpy'`:** Terminal C was not sourced. Run `source /opt/ros/jazzy/setup.bash` and try again.
 > **The node runs but X3 does not move:** the bridge is not running in Terminal B, or Gazebo is paused.
 
+## Step 12: Hold a Height Using Feedback
+
+**Where:** Terminal C (Inside Docker), with the world open in Terminal A, the bridge from Step 10 running in Terminal B, and X3 on the ground.
+
+`hover.py` flew blind: climb for 5 seconds and hope the height is right. This node reads the drone's position back from `/x3/odom` and corrects, which is what every controller does, from this one to the real autopilot:
+```bash
+python3 /workspace/sim/nodes/altitude_hold.py
+```
+
+### What You Should See
+* Once a second the node prints the height, the target (2 m) and the climb speed it chose.
+* The climb speed starts at +0.50 m/s and shrinks as X3 gets closer, until the height reads 2.00 m and the speed reads 0.
+* It runs until you press `Ctrl+C`. X3 keeps hovering afterwards; land with Step 10.5.
+
+### Read the Node
+Open `sim/nodes/altitude_hold.py`. Compared with `hover.py`, two things are new:
+1. `create_subscription(Odometry, "/x3/odom", self.on_odom, 10)` asks ROS to call `on_odom()` whenever a position message arrives. That is how a node reads anything: it does not ask, it gets called.
+2. `tick()` computes `error = TARGET - height` and commands `speed = GAIN * error`, capped at 0.5 m/s. Far below the target: climb fast. Nearly there: climb slowly. At the target: stop. This is a **proportional controller**, the simplest kind of feedback.
+
+Two numbers to play with: `TARGET` (try 1.0 or 3.0) and `GAIN` (try 3.0, and watch it overshoot and wobble before settling). Those two experiments are most of what a controls course teaches in its first week.
+
+> **The node prints nothing:** it has not received a position yet. Check the bridge is running and that `ros2 topic echo --once /x3/odom` shows data.
+> **X3 climbs past the target and keeps going:** `GAIN` is negative or the bridge is sending stale data. Reset both numbers to the values in the file.
+
 ---
 
 ## First-Flight Checklist
@@ -416,6 +441,7 @@ Complete these milestones to verify your setup works:
 - [ ] `fly_x3.sh` completes a full flight and X3 ends on the floor with motors off
 - [ ] X3 takes off from a `ros2 topic pub` command and `/x3/odom` reports its height
 - [ ] `hover.py` takes X3 off and leaves it hovering
+- [ ] `altitude_hold.py` reports `height 2.00 m` and holds there
 
 **Need help?** Message a team lead with the **step number** that failed and copy-paste the exact terminal error. If you modified flight behavior, include a short screen recording.
 
