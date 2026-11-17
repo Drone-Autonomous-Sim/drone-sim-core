@@ -13,6 +13,7 @@ Welcome to the PURC Drone Simulation guide! Use this repository and walkthrough 
 - [Step 6: Fly the X3 Drone](#step-6-fly-the-x3-drone)
 - [Step 7: Save Your Custom World](#step-7-save-your-custom-world)
 - [Step 8: Shut Down & Come Back Later](#step-8-shut-down--come-back-later)
+- [Step 9: Fly the Same Pattern From a Script](#step-9-fly-the-same-pattern-from-a-script)
 - [First-Flight Checklist](#first-flight-checklist)
 - [Troubleshooting](#troubleshooting)
 - [Optional: Open the Sensor Lab](#optional-open-the-sensor-lab)
@@ -310,6 +311,25 @@ gz sim -r -v 4 /workspace/sim/worlds/my_world.sdf
    ```
 3. Follow [Step 5](#step-5-open-a-second-terminal-for-flight-controls) to connect Terminal B for flight controls.
 
+## Step 9: Fly the Same Pattern From a Script
+
+**Where:** Terminal B (Inside Docker), with the drone world open in Terminal A and X3 on the ground.
+
+Typing six commands for every test flight gets old. A script is just those commands saved in a file and run in order. The repo includes one that does all of Step 6:
+```bash
+bash /workspace/sim/scripts/fly_x3.sh
+```
+
+### What You Should See
+* Terminal B prints each phase (`arm`, `climb for 5 s`, `forward for 3 s`, ...) as it starts.
+* X3 arms, climbs, hovers, flies forward, turns left, descends to the floor, and switches its motors off. The whole flight takes about 30 seconds.
+
+### Read the Script
+Open `sim/scripts/fly_x3.sh` in any editor. It is under 50 lines, half of them comments, and every `gz topic` line is one you typed in Step 6. The only new idea is `move`, a three-line shortcut so the velocity command is written once instead of six times. Change a number, run it again, watch what happens: every later step in this guide starts the same way.
+
+> **If X3 is already in the air**, land it first (Step 6.6); the script assumes it starts on the ground.
+> **If the script stops partway**, send the hover command from Step 6.5, land, and re-run.
+
 ---
 
 ## First-Flight Checklist
@@ -323,6 +343,7 @@ Complete these milestones to verify your setup works:
 - [ ] X3 turns and stops
 - [ ] X3 lands safely before its motors are disabled
 - [ ] A saved world file (`my_world.sdf`) reopens properly
+- [ ] `fly_x3.sh` completes a full flight and X3 ends on the floor with motors off
 
 **Need help?** Message a team lead with the **step number** that failed and copy-paste the exact terminal error. If you modified flight behavior, include a short screen recording.
 
