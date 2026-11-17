@@ -368,6 +368,21 @@ flowchart LR
     pos --> odom --> b2 -- "/x3/odom" --> echo
 ```
 
+What each name in the picture is, left to right:
+
+| Name | What it is |
+| :--- | :--- |
+| `ros2 topic pub` | Command that sends one message to a ROS 2 topic. You type it. |
+| `ros2 topic echo` | Command that prints the messages arriving on a ROS 2 topic. |
+| `/x3/cmd_vel` | ROS 2 topic for velocity commands. "cmd_vel" is the usual ROS name for this. Ours to name. |
+| `/x3/odom` | ROS 2 topic carrying the drone's odometry: its estimate of where it is and how fast it moves. Ours to name. |
+| bridge | The `ros_gz_bridge` program. Takes each message from one side, converts it to the other side's type, and re-sends it. |
+| Twist | Message type for a velocity: linear (x, y, z) and angular (turn) parts. |
+| Odometry | Message type for a position plus velocity estimate. |
+| `/X3/gazebo/command/twist` | Gazebo topic the X3 velocity controller listens on. Named by the world file; it is what Step 6 published to. |
+| `/model/x3/odometry` | Gazebo topic where the simulator reports X3's position and speed. Also named by the world file. |
+
+
 1. In Terminal B, start the bridge and leave it running:
    ```bash
    ros2 run ros_gz_bridge parameter_bridge --ros-args -p config_file:=/workspace/sim/bridge/x3.yaml
