@@ -15,6 +15,7 @@ Welcome to the PURC Drone Simulation guide! Use this repository and walkthrough 
 - [Step 8: Shut Down & Come Back Later](#step-8-shut-down--come-back-later)
 - [Step 9: Fly the Same Pattern From a Script](#step-9-fly-the-same-pattern-from-a-script)
 - [Step 10: Fly From ROS 2](#step-10-fly-from-ros-2)
+- [Step 11: Your First ROS 2 Node](#step-11-your-first-ros-2-node)
 - [First-Flight Checklist](#first-flight-checklist)
 - [Troubleshooting](#troubleshooting)
 - [Optional: Open the Sensor Lab](#optional-open-the-sensor-lab)
@@ -372,6 +373,33 @@ Same drone, same controller. The difference is that `/x3/cmd_vel` is now a ROS 2
 > **`ros2 topic pub` just sits there** saying it is waiting for a subscriber: the bridge is not running. Check Terminal B.
 > **`ros2 topic list` shows nothing** or only `/parameter_events` and `/rosout`: Terminal C was not sourced, or the bridge is not running.
 
+## Step 11: Your First ROS 2 Node
+
+**Where:** Terminal C (Inside Docker), with the world open in Terminal A, the bridge from Step 10 running in Terminal B, and X3 on the ground.
+
+Everything so far was typed by hand. A ROS 2 program that sends those messages itself is called a **node**. The repo has one that arms X3, climbs for 5 seconds, then hovers:
+```bash
+python3 /workspace/sim/nodes/hover.py
+```
+
+### What You Should See
+* X3 arms and climbs for 5 seconds, then holds about 1.5 m up.
+* After 6 seconds the node prints `hovering; land with the Step 10 commands` and exits. X3 keeps hovering: Gazebo holds the last velocity command (zero) until told otherwise.
+* Land and disarm with the commands in Step 10.5.
+
+### Read the Node
+Open `sim/nodes/hover.py`. It is 50 lines, and its shape is the shape of every ROS 2 node:
+1. `class Hover(Node)` creates the node and gives it a name.
+2. `create_publisher` opens the two topics from Step 10, `/x3/enable` and `/x3/cmd_vel`.
+3. `create_timer(0.1, self.tick)` makes ROS call `tick()` ten times a second.
+4. `tick()` decides what to send this time: climb for the first 50 ticks, zeros after that.
+5. `main()` keeps the node spinning so the timer fires.
+
+Change the `50` to `100` and X3 climbs twice as high. Move the `0.3` from `cmd.linear.z` to `cmd.linear.x` and it goes forward instead of up. Every later node adds to this skeleton; none replaces it.
+
+> **`ModuleNotFoundError: No module named 'rclpy'`:** Terminal C was not sourced. Run `source /opt/ros/jazzy/setup.bash` and try again.
+> **The node runs but X3 does not move:** the bridge is not running in Terminal B, or Gazebo is paused.
+
 ---
 
 ## First-Flight Checklist
@@ -387,6 +415,7 @@ Complete these milestones to verify your setup works:
 - [ ] A saved world file (`my_world.sdf`) reopens properly
 - [ ] `fly_x3.sh` completes a full flight and X3 ends on the floor with motors off
 - [ ] X3 takes off from a `ros2 topic pub` command and `/x3/odom` reports its height
+- [ ] `hover.py` takes X3 off and leaves it hovering
 
 **Need help?** Message a team lead with the **step number** that failed and copy-paste the exact terminal error. If you modified flight behavior, include a short screen recording.
 
