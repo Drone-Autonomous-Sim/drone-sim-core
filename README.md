@@ -343,14 +343,23 @@ Change a number in the script, run it again, watch what happens: every later ste
 
 **Where:** Terminal B (Inside Docker) for the bridge, plus a new **Terminal C** opened the same way as Step 5. Drone world open in Terminal A, X3 on the ground.
 
-So far you have talked to Gazebo directly. That is fine for one drone in a simulator. The real drone's software will be several programs that have to talk to each other: one reading the lidar, one building a map, one planning a path, one talking to the flight controller. **ROS 2** is the system those programs use to talk. It has two core ideas. A **node** is one program with one job. A **topic** is a named channel; nodes *publish* messages to topics and *subscribe* to topics, and never need to know who is on the other end. That last part is why the team bothers: the map-building node will subscribe to a lidar topic, and it will not care whether the lidar is simulated or real. (The ROS 2 docs introduce both in [Understanding nodes](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Nodes/Understanding-ROS2-Nodes.html) and [Understanding topics](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Topics/Understanding-ROS2-Topics.html).)
+So far you have talked to Gazebo directly. That is fine for one drone in a simulator. The real drone's software will be several programs that have to talk to each other: one reading the lidar, one building a map, one planning a path, one talking to the flight controller. If each of those had to know how to connect to every other, adding or replacing one would mean changing all of them, and swapping the simulated lidar for the real one would mean rewriting the map builder. **ROS 2** is the standard way robotics software avoids that. It has two core ideas. A **node** is one program with one job. A **topic** is a named channel; nodes *publish* messages to topics and *subscribe* to topics, and never need to know who is on the other end. So the map-building node subscribes to a lidar topic and does not care whether the lidar is simulated or real. (The ROS 2 docs introduce both in [Understanding nodes](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Nodes/Understanding-ROS2-Nodes.html) and [Understanding topics](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Topics/Understanding-ROS2-Topics.html).)
 
 Gazebo has its own topics, the ones you used in Step 6, and ROS 2 cannot see them. A small program called the **bridge** copies messages between the two systems and converts the message type on the way. The file `sim/bridge/x3.yaml` tells it which three topics to copy and what to call each on the ROS side. Here is what this step builds, left to right:
 
 ```text
-Terminal C                    bridge                             Gazebo
-ros2 topic pub  --->  /x3/cmd_vel  --->  /X3/gazebo/command/twist  --->  X3 moves
-ros2 topic echo <---  /x3/odom     <---  /model/x3/odometry        <---  X3 position
++-------------------------+     +---------------------+     +-------------------------------+
+|  ROS 2 side (Terminal C)|     |       bridge        |     |   Gazebo side (Terminal A)    |
+|                         |     |                     |     |                               |
+|  ros2 topic pub  -------+---->|  Twist  ->  Twist   +---->|  /X3/gazebo/command/twist     |
+|    to /x3/cmd_vel       |     |                     |     |    X3 moves                   |
+|                         |     |                     |     |                               |
+|  ros2 topic echo <------+-----+ Odometry <- Odometry|<----+  /model/x3/odometry           |
+|    on /x3/odom          |     |                     |     |    X3 reports its position    |
+|                         |     |                     |     |                               |
++-------------------------+     +---------------------+     +-------------------------------+
+ topic names: ours to            copies every message,       topic names: fixed by
+ choose (in x3.yaml)             converts its type           the world file
 ```
 
 1. In Terminal B, start the bridge and leave it running:
