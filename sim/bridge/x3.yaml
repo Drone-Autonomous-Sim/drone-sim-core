@@ -8,6 +8,9 @@
 # Each entry: the name on the ROS side (our choice), the name on the
 # Gazebo side (fixed by the world file), the two message types, and
 # which way messages flow.
+#
+# Field reference: https://github.com/gazebosim/ros_gz/blob/ros2/ros_gz_bridge/README.md
+# Background:      https://gazebosim.org/docs/harmonic/ros2_integration/
 
 # Arm / disarm. ROS publishes, Gazebo listens.
 - ros_topic_name: "/x3/enable"

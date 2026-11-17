@@ -9,6 +9,9 @@ Ctrl+C stops the node; X3 keeps hovering. Land with the Step 10 commands.
 hover.py flew blind: climb for 5 s and hope. This node reads the drone's
 position back from /x3/odom and corrects. That read-decide-command loop is
 what every controller does, from this one to the real autopilot.
+
+Subscribers: https://docs.ros.org/en/jazzy/Concepts/Basic/About-Topics.html
+Proportional control: https://en.wikipedia.org/wiki/Proportional_control
 """
 import rclpy
 from rclpy.node import Node

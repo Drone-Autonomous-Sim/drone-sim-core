@@ -328,16 +328,43 @@ bash /workspace/sim/scripts/fly_x3.sh
 * X3 arms, climbs, hovers, flies forward, turns left, descends to the floor, and switches its motors off. The whole flight takes about 30 seconds.
 
 ### Read the Script
-Open `sim/scripts/fly_x3.sh` in any editor. It is under 50 lines, half of them comments, and every `gz topic` line is one you typed in Step 6. The only new idea is `move`, a three-line shortcut so the velocity command is written once instead of six times. Change a number, run it again, watch what happens: every later step in this guide starts the same way.
+Open `sim/scripts/fly_x3.sh` in any editor. It is under 50 lines, half of them comments, and every `gz topic` line is one you typed in Step 6. The only new idea is `move`, a three-line shortcut so the velocity command is written once instead of six times.
+
+The Gazebo documentation explains the pieces of that command in its own words. On what a topic is:
+
+> "A topic is simply a name for grouping a specific set of messages or a particular service."
+> — Gazebo docs, [Moving the robot](https://gazebosim.org/docs/harmonic/moving_robot/)
+
+And on the three options every `gz topic` line in the script uses:
+
+> "The command specifies the topic to publish to after the `-t` option."
+> "After the `-m` we specify the message type."
+> "After the `-p` option we specify the content (value) of the message."
+> — Gazebo docs, [Moving the robot](https://gazebosim.org/docs/harmonic/moving_robot/)
+
+So `-t /X3/gazebo/command/twist` is *where*, `-m gz.msgs.Twist` is *what kind*, and `-p 'linear: {...}'` is *the values*. The same page notes: "Don't forget to press the play button in the simulation." Change a number in the script, run it again, watch what happens: every later step in this guide starts the same way.
 
 > **If X3 is already in the air**, land it first (Step 6.6); the script assumes it starts on the ground.
 > **If the script stops partway**, send the hover command from Step 6.5, land, and re-run.
+
+---
 
 ## Step 10: Fly From ROS 2
 
 **Where:** Terminal B (Inside Docker) for the bridge, plus a new **Terminal C** opened the same way as Step 5. Drone world open in Terminal A, X3 on the ground.
 
-So far you have talked to Gazebo directly. The team's real software will be written in **ROS 2**, which has its own topics that Gazebo cannot see. A small program called the **bridge** copies messages between the two. The file `sim/bridge/x3.yaml` tells it which three topics to copy and what to call them on the ROS side.
+So far you have talked to Gazebo directly. The team's real software will be written in **ROS 2**, which has its own topics that Gazebo cannot see. The ROS 2 documentation describes topics this way:
+
+> "Topics are a vital element of the ROS graph that act as a bus for nodes to exchange messages."
+> — ROS 2 docs, [Understanding topics](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Topics/Understanding-ROS2-Topics.html)
+
+A small program called the **bridge** copies messages between the two systems:
+
+> "`ros_gz_bridge` provides a network bridge which enables the exchange of messages between ROS 2 and Gazebo Transport."
+> "The configuration file is a YAML file that contains the mapping between the ROS and Gazebo topics to be bridged."
+> — Gazebo docs, [ROS 2 integration](https://gazebosim.org/docs/harmonic/ros2_integration/)
+
+The file `sim/bridge/x3.yaml` is that configuration: three topics, with what to call each on the ROS side.
 
 1. In Terminal B, start the bridge and leave it running:
    ```bash
@@ -359,7 +386,7 @@ So far you have talked to Gazebo directly. The team's real software will be writ
    ros2 topic pub --once /x3/cmd_vel geometry_msgs/msg/Twist "{}"
    ros2 topic echo --once /x3/odom --field pose.pose.position
    ```
-   `z` is the height in metres. Fields you leave out of a message are zero, so `"{}"` is the hover command.
+   `z` is the height in metres.
 5. Land, wait until X3 is on the floor, then disarm:
    ```bash
    ros2 topic pub --once /x3/cmd_vel geometry_msgs/msg/Twist "{linear: {z: -0.2}}"
@@ -368,17 +395,48 @@ So far you have talked to Gazebo directly. The team's real software will be writ
    ros2 topic pub --once /x3/enable std_msgs/msg/Bool "{data: false}"
    ```
 
-### What Changed
-Same drone, same controller. The difference is that `/x3/cmd_vel` is now a ROS 2 topic, so **any ROS 2 program that publishes a Twist to it flies the drone**. That is what the following steps build. Open `sim/bridge/x3.yaml`: the ROS-side names (`/x3/...`) are ours to choose, the Gazebo-side names are fixed by the world file, and `cmd_vel` is the name ROS programs conventionally use for a velocity command.
+### What the Commands Mean
+`ros2 topic pub` is the ROS 2 counterpart of `gz topic -p`. From the ROS 2 docs:
+
+> "In order to publish data to a topic, you need to pass the data in the form of YAML strings."
+> "`--once` is an optional argument meaning 'publish one message then exit'."
+> "You do not need to specify the entire message ... you can just specify the values you want to change."
+> — ROS 2 docs, [Understanding topics](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Topics/Understanding-ROS2-Topics.html)
+
+That last line is why `"{}"` is the hover command: every field you leave out is zero.
+
+The two message types are defined by one-line comments in ROS itself:
+* `geometry_msgs/msg/Twist`: "This expresses velocity in free space broken into its linear and angular parts." ([Twist.msg](https://github.com/ros2/common_interfaces/blob/jazzy/geometry_msgs/msg/Twist.msg))
+* `nav_msgs/msg/Odometry`: "This represents an estimate of a position and velocity in free space." ([Odometry.msg](https://github.com/ros2/common_interfaces/blob/jazzy/nav_msgs/msg/Odometry.msg))
+
+### Read the Config
+Open `sim/bridge/x3.yaml`. Each entry has five fields; the bridge's own README lists the allowed values of the last one:
+
+> `direction: BIDIRECTIONAL  # Default "BIDIRECTIONAL" - Bridge both directions`
+> `# "GZ_TO_ROS" - Bridge Gz topic to ROS`
+> `# "ROS_TO_GZ" - Bridge ROS topic to Gz`
+> — [ros_gz_bridge README](https://github.com/gazebosim/ros_gz/blob/ros2/ros_gz_bridge/README.md), "Configuring the Bridge via YAML"
+
+The ROS-side names (`/x3/...`) are ours to choose; the Gazebo-side names are fixed by the world file; `cmd_vel` is the name ROS programs conventionally use for a velocity command. The point of the whole step: `/x3/cmd_vel` is now a ROS 2 topic, so **any ROS 2 program that publishes a Twist to it flies the drone**.
 
 > **`ros2 topic pub` just sits there** saying it is waiting for a subscriber: the bridge is not running. Check Terminal B.
-> **`ros2 topic list` shows nothing** or only `/parameter_events` and `/rosout`: Terminal C was not sourced, or the bridge is not running.
+> **`ros2 topic list` shows nothing** or only `/parameter_events` and `/rosout`: Terminal C was not sourced, or the bridge is not running. The ROS 2 docs: "Without sourcing the setup files, you won't be able to access ROS 2 commands, or find or use ROS 2 packages." ([Configuring environment](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Configuring-ROS2-Environment.html))
+
+---
 
 ## Step 11: Your First ROS 2 Node
 
 **Where:** Terminal C (Inside Docker), with the world open in Terminal A, the bridge from Step 10 running in Terminal B, and X3 on the ground.
 
-Everything so far was typed by hand. A ROS 2 program that sends those messages itself is called a **node**. The repo has one that arms X3, climbs for 5 seconds, then hovers:
+Everything so far was typed by hand. A ROS 2 program that sends those messages itself is called a **node**:
+
+> "Nodes are typically the unit of computation in a ROS graph; each node should do one logical thing."
+> — ROS 2 docs, [About nodes](https://docs.ros.org/en/jazzy/Concepts/Basic/About-Nodes.html)
+
+> "Each node in ROS should be responsible for a single, modular purpose, e.g. controlling the wheel motors."
+> — ROS 2 docs, [Understanding nodes](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Nodes/Understanding-ROS2-Nodes.html)
+
+The repo has one whose single purpose is: arm X3, climb for 5 seconds, then hover.
 ```bash
 python3 /workspace/sim/nodes/hover.py
 ```
@@ -389,17 +447,22 @@ python3 /workspace/sim/nodes/hover.py
 * Land and disarm with the commands in Step 10.5.
 
 ### Read the Node
-Open `sim/nodes/hover.py`. It is 50 lines, and its shape is the shape of every ROS 2 node:
-1. `class Hover(Node)` creates the node and gives it a name.
-2. `create_publisher` opens the two topics from Step 10, `/x3/enable` and `/x3/cmd_vel`.
-3. `create_timer(0.1, self.tick)` makes ROS call `tick()` ten times a second.
-4. `tick()` decides what to send this time: climb for the first 50 ticks, zeros after that.
-5. `main()` keeps the node spinning so the timer fires.
+Open `sim/nodes/hover.py`. It is 50 lines and follows the ROS 2 publisher tutorial almost line for line. That tutorial explains each part; quoted here with our names substituted in square brackets:
+
+1. `class Hover(Node)` with `super().__init__("hover")`: "`super().__init__` calls the `Node` class's constructor and gives it your node name" [here `hover`].
+2. `create_publisher(Twist, "/x3/cmd_vel", 10)`: "`create_publisher` declares that the node publishes messages of type [`Twist`] over a topic named [`/x3/cmd_vel`], and that the 'queue size' is 10."
+3. `create_timer(0.1, self.tick)`: "`create_timer` is used to create a callback that executes every [0.1] seconds."
+4. `tick()` is that callback. It decides what to send this time: climb for the first 50 ticks, zeros after that.
+5. `main()`: "First the `rclpy` library is initialized, then the node is created, and then it 'spins' the node" so the timer keeps firing.
+
+— quotes from ROS 2 docs, [Writing a simple publisher and subscriber (Python)](https://docs.ros.org/en/jazzy/Tutorials/Beginner-Client-Libraries/Writing-A-Simple-Py-Publisher-And-Subscriber.html)
 
 Change the `50` to `100` and X3 climbs twice as high. Move the `0.3` from `cmd.linear.z` to `cmd.linear.x` and it goes forward instead of up. Every later node adds to this skeleton; none replaces it.
 
 > **`ModuleNotFoundError: No module named 'rclpy'`:** Terminal C was not sourced. Run `source /opt/ros/jazzy/setup.bash` and try again.
 > **The node runs but X3 does not move:** the bridge is not running in Terminal B, or Gazebo is paused.
+
+---
 
 ## Step 12: Hold a Height Using Feedback
 
@@ -416,14 +479,24 @@ python3 /workspace/sim/nodes/altitude_hold.py
 * It runs until you press `Ctrl+C`. X3 keeps hovering afterwards; land with Step 10.5.
 
 ### Read the Node
-Open `sim/nodes/altitude_hold.py`. Compared with `hover.py`, two things are new:
-1. `create_subscription(Odometry, "/x3/odom", self.on_odom, 10)` asks ROS to call `on_odom()` whenever a position message arrives. That is how a node reads anything: it does not ask, it gets called.
-2. `tick()` computes `error = TARGET - height` and commands `speed = GAIN * error`, capped at 0.5 m/s. Far below the target: climb fast. Nearly there: climb slowly. At the target: stop. This is a **proportional controller**, the simplest kind of feedback.
+Open `sim/nodes/altitude_hold.py`. Compared with `hover.py`, two things are new.
+
+**1. A subscriber.** Publishing is only half of ROS 2:
+
+> "A publish/subscribe system is one in which there are producers of data (publishers) and consumers of data (subscribers)."
+> "Topics should be used for continuous data streams, like sensor data, robot state, etc."
+> — ROS 2 docs, [About topics](https://docs.ros.org/en/jazzy/Concepts/Basic/About-Topics.html)
+
+`/x3/odom` is exactly such a stream, and `create_subscription(Odometry, "/x3/odom", self.on_odom, 10)` makes this node a consumer of it. The tutorial: "The constructor creates a subscriber with the same arguments as the publisher using `create_subscription`." ROS then calls `on_odom()` whenever a message arrives. That is how a node reads anything: it does not ask, it gets called.
+
+**2. A feedback loop.** `tick()` computes `error = TARGET - height` and commands `speed = GAIN * error`, capped at 0.5 m/s. That is the textbook definition of a **proportional controller**, whose output is "the multiplication product of the error signal and the proportional gain" ([Wikipedia, Proportional control](https://en.wikipedia.org/wiki/Proportional_control)). Far below the target: climb fast. Nearly there: climb slowly. At the target: stop.
 
 Two numbers to play with: `TARGET` (try 1.0 or 3.0) and `GAIN` (try 3.0, and watch it overshoot and wobble before settling). Those two experiments are most of what a controls course teaches in its first week.
 
 > **The node prints nothing:** it has not received a position yet. Check the bridge is running and that `ros2 topic echo --once /x3/odom` shows data.
 > **X3 climbs past the target and keeps going:** `GAIN` is negative or the bridge is sending stale data. Reset both numbers to the values in the file.
+
+> Quotations in Steps 9 to 12 are from the [ROS 2 documentation](https://docs.ros.org/en/jazzy/) and the [Gazebo documentation](https://gazebosim.org/docs/harmonic/), both published under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), and from Wikipedia ([CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)). Read the linked pages: they are short, and they are where these ideas are explained by the people who built the tools.
 
 ---
 

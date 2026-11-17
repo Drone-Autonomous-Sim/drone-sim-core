@@ -7,6 +7,8 @@
 #
 # Every command here is one you have already typed by hand. A script is just
 # those commands saved in order so the whole flight is one command.
+#
+# What -t, -m and -p mean: https://gazebosim.org/docs/harmonic/moving_robot/
 
 set -e   # stop at the first command that fails instead of carrying on blindly
 

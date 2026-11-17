@@ -8,6 +8,9 @@ bridge from Step 10 running in Terminal B:
 A ROS 2 program is called a node. Every node has the skeleton you see here:
 create the node, create publishers, run a timer, keep spinning so the timer
 fires. Later nodes only add subscribers and more logic inside tick().
+
+The official tutorial this follows:
+https://docs.ros.org/en/jazzy/Tutorials/Beginner-Client-Libraries/Writing-A-Simple-Py-Publisher-And-Subscriber.html
 """
 import rclpy
 from rclpy.node import Node
