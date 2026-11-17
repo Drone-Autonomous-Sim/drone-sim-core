@@ -14,6 +14,7 @@ Welcome to the PURC Drone Simulation guide! Use this repository and walkthrough 
 - [Step 7: Save Your Custom World](#step-7-save-your-custom-world)
 - [Step 8: Shut Down & Come Back Later](#step-8-shut-down--come-back-later)
 - [Step 9: Fly the Same Pattern From a Script](#step-9-fly-the-same-pattern-from-a-script)
+- [Step 10: Fly From ROS 2](#step-10-fly-from-ros-2)
 - [First-Flight Checklist](#first-flight-checklist)
 - [Troubleshooting](#troubleshooting)
 - [Optional: Open the Sensor Lab](#optional-open-the-sensor-lab)
@@ -330,6 +331,47 @@ Open `sim/scripts/fly_x3.sh` in any editor. It is under 50 lines, half of them c
 > **If X3 is already in the air**, land it first (Step 6.6); the script assumes it starts on the ground.
 > **If the script stops partway**, send the hover command from Step 6.5, land, and re-run.
 
+## Step 10: Fly From ROS 2
+
+**Where:** Terminal B (Inside Docker) for the bridge, plus a new **Terminal C** opened the same way as Step 5. Drone world open in Terminal A, X3 on the ground.
+
+So far you have talked to Gazebo directly. The team's real software will be written in **ROS 2**, which has its own topics that Gazebo cannot see. A small program called the **bridge** copies messages between the two. The file `sim/bridge/x3.yaml` tells it which three topics to copy and what to call them on the ROS side.
+
+1. In Terminal B, start the bridge and leave it running:
+   ```bash
+   ros2 run ros_gz_bridge parameter_bridge --ros-args -p config_file:=/workspace/sim/bridge/x3.yaml
+   ```
+   It prints one `Creating ... bridge` line per topic, then waits.
+2. Open Terminal C like Step 5 (`docker ps`, `docker exec`, `source`) and list the ROS topics:
+   ```bash
+   ros2 topic list
+   ```
+   You should see `/x3/enable`, `/x3/cmd_vel` and `/x3/odom`.
+3. Arm and take off:
+   ```bash
+   ros2 topic pub --once /x3/enable std_msgs/msg/Bool "{data: true}"
+   ros2 topic pub --once /x3/cmd_vel geometry_msgs/msg/Twist "{linear: {z: 0.3}}"
+   ```
+4. After a few seconds, hover, then ask the drone where it is:
+   ```bash
+   ros2 topic pub --once /x3/cmd_vel geometry_msgs/msg/Twist "{}"
+   ros2 topic echo --once /x3/odom --field pose.pose.position
+   ```
+   `z` is the height in metres. Fields you leave out of a message are zero, so `"{}"` is the hover command.
+5. Land, wait until X3 is on the floor, then disarm:
+   ```bash
+   ros2 topic pub --once /x3/cmd_vel geometry_msgs/msg/Twist "{linear: {z: -0.2}}"
+   ```
+   ```bash
+   ros2 topic pub --once /x3/enable std_msgs/msg/Bool "{data: false}"
+   ```
+
+### What Changed
+Same drone, same controller. The difference is that `/x3/cmd_vel` is now a ROS 2 topic, so **any ROS 2 program that publishes a Twist to it flies the drone**. That is what the following steps build. Open `sim/bridge/x3.yaml`: the ROS-side names (`/x3/...`) are ours to choose, the Gazebo-side names are fixed by the world file, and `cmd_vel` is the name ROS programs conventionally use for a velocity command.
+
+> **`ros2 topic pub` just sits there** saying it is waiting for a subscriber: the bridge is not running. Check Terminal B.
+> **`ros2 topic list` shows nothing** or only `/parameter_events` and `/rosout`: Terminal C was not sourced, or the bridge is not running.
+
 ---
 
 ## First-Flight Checklist
@@ -344,6 +386,7 @@ Complete these milestones to verify your setup works:
 - [ ] X3 lands safely before its motors are disabled
 - [ ] A saved world file (`my_world.sdf`) reopens properly
 - [ ] `fly_x3.sh` completes a full flight and X3 ends on the floor with motors off
+- [ ] X3 takes off from a `ros2 topic pub` command and `/x3/odom` reports its height
 
 **Need help?** Message a team lead with the **step number** that failed and copy-paste the exact terminal error. If you modified flight behavior, include a short screen recording.
 
