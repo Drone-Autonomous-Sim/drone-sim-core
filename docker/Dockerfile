@@ -106,6 +106,24 @@ RUN git clone --depth 1 https://github.com/bitcraze/crazyflie-simulation.git /op
       && cd /opt/cf_ws \
       && colcon build --symlink-install"
 
+# PX4 software-in-the-loop for Gazebo Harmonic. Inside the container run:
+# make -C /opt/PX4-Autopilot px4_sitl gz_x500_depth
+ARG PX4_VERSION=v1.17.0
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    cmake ninja-build python3-venv pkg-config protobuf-compiler \
+    libssl-dev libxml2-utils libgstreamer-plugins-base1.0-dev \
+    && rm -rf /var/lib/apt/lists/* \
+    && git clone --branch "${PX4_VERSION}" --depth 1 --recurse-submodules --shallow-submodules \
+        https://github.com/PX4/PX4-Autopilot.git /opt/PX4-Autopilot \
+    && python3 -m venv --system-site-packages /opt/px4-venv \
+    && /opt/px4-venv/bin/pip install --no-cache-dir -r /opt/PX4-Autopilot/Tools/setup/requirements.txt \
+    && bash -c 'source /opt/ros/jazzy/setup.bash && source /opt/px4-venv/bin/activate \
+        && cd /opt/PX4-Autopilot \
+        && GZ_DISTRO=harmonic cmake -S . -B build/px4_sitl_default -G Ninja -DCONFIG=px4_sitl_default \
+        && cmake --build build/px4_sitl_default --parallel 2' \
+    && test -x /opt/PX4-Autopilot/build/px4_sitl_default/bin/px4 \
+    && test -s /opt/PX4-Autopilot/build/px4_sitl_default/rootfs/gz_env.sh
+
 # 9. Runtime defaults: Cyclone DDS + non-destructive Gazebo resource path + auto-sourcing
 ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 
