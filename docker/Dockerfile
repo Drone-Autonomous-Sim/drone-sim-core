@@ -92,11 +92,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # 7. Official cflib (physical Crazyradio 2.0 + UDP driver) & Crazyswarm2 Python helpers
+#    Use --no-deps so pip keeps Ubuntu 24.04's apt PyYAML (6.0.1) and NumPy (1.26.4),
+#    which ROS 2 Jazzy's cv_bridge and OpenCV are compiled against.
 RUN pip3 install --no-cache-dir --break-system-packages \
     rowan \
     transforms3d \
+    "libusb-package~=1.0" \
     && git clone --depth 1 https://github.com/bitcraze/crazyflie-lib-python.git /opt/crazyflie-lib-python \
-    && pip3 install --no-cache-dir --break-system-packages -e /opt/crazyflie-lib-python
+    && pip3 install --no-cache-dir --break-system-packages --no-deps -e /opt/crazyflie-lib-python
 
 # 8. Crazyflie 2.1 Gazebo Harmonic model + ROS 2/Gazebo bridge (verified on ROS 2 Jazzy + Harmonic)
 RUN git clone --depth 1 https://github.com/bitcraze/crazyflie-simulation.git /opt/crazyflie-simulation \
