@@ -141,7 +141,7 @@ fi
 export GZ_SIM_RESOURCE_PATH="/opt/crazyflie-simulation/simulator_files/gazebo:/workspace/sim/models:${GZ_SIM_RESOURCE_PATH:-}"
 exec "$@"
 EOF
-RUN chmod +x /ros_entrypoint.sh
+RUN chmod +x /ros_entrypoint.sh && /ros_entrypoint.sh true
 
 # Keep Terminal B (`docker exec -it CONTAINER_ID bash`) auto-sourced as well
 RUN cat <<'EOF' >> /root/.bashrc
