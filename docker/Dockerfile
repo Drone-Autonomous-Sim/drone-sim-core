@@ -119,37 +119,7 @@ if [ -f "/opt/cf_ws/install/setup.bash" ]; then
 fi
 if [ -f "/workspace/ros2_ws/install/setup.bash" ]; then
     source "/workspace/ros2_ws/install/setup.bash"
+elif [ -f "/workspace/install/setup.bash" ]; then
+    source "/workspace/install/setup.bash"
 fi
-export GZ_SIM_RESOURCE_PATH="/opt/crazyflie-simulation/simulator_files/gazebo:/workspace/sim/models:${GZ_SIM_RESOURCE_PATH:-}"
-exec "$@"
-EOF
-
-# Keep Terminal B (`docker exec -it CONTAINER_ID bash`) auto-sourced as well
-RUN cat <<'EOF' >> /root/.bashrc
-source /opt/ros/jazzy/setup.bash
-[ -f /opt/cf_ws/install/setup.bash ] && source /opt/cf_ws/install/setup.bash
-[ -f /workspace/ros2_ws/install/setup.bash ] && source /workspace/ros2_ws/install/setup.bash
-export GZ_SIM_RESOURCE_PATH="/opt/crazyflie-simulation/simulator_files/gazebo:/workspace/sim/models:${GZ_SIM_RESOURCE_PATH:-}"
-EOF
-
-# ADD THESE TWO LINES RIGHT HERE:
-RUN sed -i 's/\r$//' /ros_entrypoint.sh /root/.bashrc \
-    && chmod +x /ros_entrypoint.sh
-
-WORKDIR /workspace
-ENTRYPOINT ["/ros_entrypoint.sh"]
-CMD ["bash"]
-
-# ==============================================================================
-# Stage 2: gpu (Default target — ~11-13 GB uncompressed; fits GitHub Actions CI)
-# ==============================================================================
-FROM sim AS gpu
-
-ARG TARGETARCH
-RUN if [ "${TARGETARCH}" = "amd64" ]; then \
-        pip3 install --no-cache-dir --break-system-packages \
-            torch torchvision --index-url https://download.pytorch.org/whl/cu128; \
-    else \
-        pip3 install --no-cache-dir --break-system-packages \
-            torch torchvision; \
-    fi
+export GZ_SIM_RESOURCE_PATH="/opt/crazyflie-simulation/simulator_files/gazebo:/workspace/sim/models${GZ_SIM_RESOURCE_PATH:+:${
