@@ -110,8 +110,6 @@ RUN git clone --depth 1 https://github.com/bitcraze/crazyflie-simulation.git /op
       && colcon build --symlink-install"
 
 # 9. Runtime defaults: Cyclone DDS + non-destructive Gazebo resource path + auto-sourcing
-ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-
 RUN cat <<'EOF' > /ros_entrypoint.sh
 #!/usr/bin/env bash
 set -e
@@ -125,7 +123,6 @@ fi
 export GZ_SIM_RESOURCE_PATH="/opt/crazyflie-simulation/simulator_files/gazebo:/workspace/sim/models:${GZ_SIM_RESOURCE_PATH:-}"
 exec "$@"
 EOF
-RUN chmod +x /ros_entrypoint.sh
 
 # Keep Terminal B (`docker exec -it CONTAINER_ID bash`) auto-sourced as well
 RUN cat <<'EOF' >> /root/.bashrc
@@ -134,6 +131,10 @@ source /opt/ros/jazzy/setup.bash
 [ -f /workspace/ros2_ws/install/setup.bash ] && source /workspace/ros2_ws/install/setup.bash
 export GZ_SIM_RESOURCE_PATH="/opt/crazyflie-simulation/simulator_files/gazebo:/workspace/sim/models:${GZ_SIM_RESOURCE_PATH:-}"
 EOF
+
+# ADD THESE TWO LINES RIGHT HERE:
+RUN sed -i 's/\r$//' /ros_entrypoint.sh /root/.bashrc \
+    && chmod +x /ros_entrypoint.sh
 
 WORKDIR /workspace
 ENTRYPOINT ["/ros_entrypoint.sh"]
