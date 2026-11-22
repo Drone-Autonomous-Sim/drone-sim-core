@@ -91,12 +91,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && (rosdep init || true) && rosdep update \
     && rm -rf /var/lib/apt/lists/*
 
-# 7. Official cflib (physical Crazyradio 2.0 + UDP driver) & Crazyswarm2 Python helpers
-RUN pip3 install --no-cache-dir --break-system-packages \
-    rowan \
-    transforms3d \
-    && git clone --depth 1 https://github.com/bitcraze/crazyflie-lib-python.git /opt/crazyflie-lib-python \
-    && pip3 install --no-cache-dir --break-system-packages -e /opt/crazyflie-lib-python
+# 7. Crazyswarm2 needs link statistics and Ubuntu Noble's NumPy 1.x ABI.
+ARG CFLIB_REV=fba61709aeb7536d5f214353ddc74fd78bf872de
+RUN git init /opt/crazyflie-lib-python \
+    && git -C /opt/crazyflie-lib-python remote add origin https://github.com/bitcraze/crazyflie-lib-python.git \
+    && git -C /opt/crazyflie-lib-python fetch --depth 1 origin "${CFLIB_REV}" \
+    && git -C /opt/crazyflie-lib-python checkout --detach FETCH_HEAD \
+    && pip3 install --no-cache-dir --break-system-packages rowan transforms3d -e /opt/crazyflie-lib-python
 
 # 8. Crazyflie 2.1 Gazebo Harmonic model + ROS 2/Gazebo bridge (verified on ROS 2 Jazzy + Harmonic)
 RUN git clone --depth 1 https://github.com/bitcraze/crazyflie-simulation.git /opt/crazyflie-simulation \
