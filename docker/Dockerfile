@@ -122,4 +122,39 @@ if [ -f "/workspace/ros2_ws/install/setup.bash" ]; then
 elif [ -f "/workspace/install/setup.bash" ]; then
     source "/workspace/install/setup.bash"
 fi
-export GZ_SIM_RESOURCE_PATH="/opt/crazyflie-simulation/simulator_files/gazebo:/workspace/sim/models${GZ_SIM_RESOURCE_PATH:+:${
+export GZ_SIM_RESOURCE_PATH="/opt/crazyflie-simulation/simulator_files/gazebo:/workspace/sim/models${GZ_SIM_RESOURCE_PATH:+:${GZ_SIM_RESOURCE_PATH}}"
+exec "$@"
+EOF
+
+# Keep Terminal B (`docker exec -it CONTAINER_ID bash`) auto-sourced as well
+RUN cat <<'EOF' >> /root/.bashrc
+source /opt/ros/jazzy/setup.bash
+[ -f /opt/cf_ws/install/setup.bash ] && source /opt/cf_ws/install/setup.bash
+[ -f /workspace/ros2_ws/install/setup.bash ] && source /workspace/ros2_ws/install/setup.bash
+[ ! -f /workspace/ros2_ws/install/setup.bash ] && [ -f /workspace/install/setup.bash ] && source /workspace/install/setup.bash
+export GZ_SIM_RESOURCE_PATH="/opt/crazyflie-simulation/simulator_files/gazebo:/workspace/sim/models${GZ_SIM_RESOURCE_PATH:+:${GZ_SIM_RESOURCE_PATH}}"
+EOF
+
+# Strip Windows CRLF line endings so edits on Windows never break the entrypoint
+RUN sed -i 's/\r$//' /ros_entrypoint.sh /root/.bashrc \
+    && chmod +x /ros_entrypoint.sh
+
+ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+
+WORKDIR /workspace
+ENTRYPOINT ["/ros_entrypoint.sh"]
+CMD ["bash"]
+
+# ==============================================================================
+# Stage 2: gpu (Default target — adds PyTorch CUDA on amd64, CPU on arm64)
+# ==============================================================================
+FROM sim AS gpu
+
+ARG TARGETARCH
+RUN if [ "${TARGETARCH}" = "amd64" ]; then \
+        pip3 install --no-cache-dir --break-system-packages \
+            torch torchvision --index-url https://download.pytorch.org/whl/cu128; \
+    else \
+        pip3 install --no-cache-dir --break-system-packages \
+            torch torchvision; \
+    fi
