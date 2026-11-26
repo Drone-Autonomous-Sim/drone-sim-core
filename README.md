@@ -13,6 +13,10 @@ Welcome to the PURC Drone Simulation guide! Use this repository and walkthrough 
 - [Step 6: Fly the X3 Drone](#step-6-fly-the-x3-drone)
 - [Step 7: Save Your Custom World](#step-7-save-your-custom-world)
 - [Step 8: Shut Down & Come Back Later](#step-8-shut-down--come-back-later)
+- [Step 9: Fly the Same Pattern From a Script](#step-9-fly-the-same-pattern-from-a-script)
+- [Step 10: Fly From ROS 2](#step-10-fly-from-ros-2)
+- [Step 11: Your First ROS 2 Node](#step-11-your-first-ros-2-node)
+- [Step 12: Hold a Height Using Feedback](#step-12-hold-a-height-using-feedback)
 - [First-Flight Checklist](#first-flight-checklist)
 - [Troubleshooting](#troubleshooting)
 - [Optional: Open the Sensor Lab](#optional-open-the-sensor-lab)
@@ -310,6 +314,177 @@ gz sim -r -v 4 /workspace/sim/worlds/my_world.sdf
    ```
 3. Follow [Step 5](#step-5-open-a-second-terminal-for-flight-controls) to connect Terminal B for flight controls.
 
+## Step 9: Fly the Same Pattern From a Script
+
+**Where:** Terminal B (Inside Docker), with the drone world open in Terminal A and X3 on the ground.
+
+Typing six commands for every test flight gets old. A script is just those commands saved in a file and run in order. The repo includes one that does all of Step 6:
+```bash
+bash /workspace/sim/scripts/fly_x3.sh
+```
+
+### What You Should See
+* Terminal B prints each phase (`arm`, `climb for 5 s`, `forward for 3 s`, ...) as it starts.
+* X3 arms, climbs, hovers, flies forward, turns left, descends to the floor, and switches its motors off. The whole flight takes about 30 seconds.
+
+### Read the Script
+Open `sim/scripts/fly_x3.sh` in any editor. It is under 50 lines, half of them comments, and every `gz topic` line is one you shuold have typed in Step 6. The only new idea is `move`, a three-line shortcut so the velocity command is written once instead of six times.
+
+Each of those `gz topic` lines has the same three parts: `-t` is the topic, which is just a name for a channel of messages; `-m` is the message type; `-p` is the message's contents. So `-t /X3/gazebo/command/twist` says *where*, `-m gz.msgs.Twist` says *what kind*, and `-p 'linear: {...}'` gives *the values*. Look at Gazebo's own walkthrough of that command: [Moving the robot](https://gazebosim.org/docs/harmonic/moving_robot/) page, pretty short and useful.
+
+Change a number in the script, run it again, watch what happens
+
+### If It Does Not Work
+> **If X3 is already in the air**, land it first (Step 6.6); the script assumes it starts on the ground.
+> **If the script stops partway**, send the hover command from Step 6.5, land, and re-run.
+
+---
+
+## Step 10: Fly From ROS 2
+
+**Where:** Terminal B (Inside Docker) for the bridge, plus a new **Terminal C** opened the same way as Step 5. Drone world open in Terminal A, X3 on the ground.
+
+So far you have talked to Gazebo directly. That is fine for one drone in a simulator. The real drone's software will be several programs that have to talk to each other: one reading the lidar, one building a map, one planning a path, one talking to the flight controller. If each of those parts had to know and coordinate how to connect to every other, adding or replacing one would mean changing all of them. This work can get pretty cumbersome. For eg, swapping the simulated lidar for the real one would mean rewriting the map builder. This is because the real lidar collects data in a sweeping line, completely different from the simulation, which assumes the lidar data arrives all at once. 
+
+So **ROS 2** is the standard way robotics software avoids that. It has two core ideas. A **node** is one program with one job (for example, processing and making a point cloud out of a lidar input, simulated or real). A **topic** is a named channel; nodes *publish* messages to topics and *subscribe* to topics they need to get info from other nodes. Notice that this way each node never needs to know who is on the other end and think about messaging policies. So, for example, a map-building node subscribes to a lidar topic and does not care whether the lidar is simulated or real. This makes it much easier to swap out simulated and real lidar processing programs from the prev. example. (The ROS 2 docs introduce both in [Understanding nodes](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Nodes/Understanding-ROS2-Nodes.html) and [Understanding topics](https://docs.ros.org/en/jazzy/Tutorials/Beginner-CLI-Tools/Understanding-ROS2-Topics/Understanding-ROS2-Topics.html).)
+
+Gazebo has its own concepts of topics, the ones you used in Step 6. But ROS 2 topics are not the same, and they can't see each other. So a small program called the **bridge** copies messages between the two systems and converts the message type on the way. The file `sim/bridge/x3.yaml` tells it which three topics to copy and what to call each on the ROS side. Here is what this step builds (left to right):
+
+```mermaid
+flowchart LR
+    subgraph ros["ROS 2 side (Terminal C)"]
+        pub["ros2 topic pub"]
+        echo["ros2 topic echo"]
+    end
+    subgraph bridge["bridge (Terminal B)"]
+        b1["converts Twist"]
+        b2["converts Odometry"]
+    end
+    subgraph gz["Gazebo side (Terminal A)"]
+        twist["/X3/gazebo/command/twist"]
+        odom["/model/x3/odometry"]
+        moves["X3 moves"]
+        pos["X3 position"]
+    end
+    pub -- "/x3/cmd_vel" --> b1 --> twist --> moves
+    pos --> odom --> b2 -- "/x3/odom" --> echo
+```
+
+What each name in the picture is, left to right:
+
+| Name | What it is |
+| :--- | :--- |
+| `ros2 topic pub` | Command that sends one message to a ROS 2 topic. You type it. |
+| `ros2 topic echo` | Command that prints the messages arriving on a ROS 2 topic. |
+| `/x3/cmd_vel` | ROS 2 topic for velocity commands. "cmd_vel" is the usual ROS name for this. Can be named anything though (this applies to all topic names. need to decide once then fix) |
+| `/x3/odom` | ROS 2 topic carrying the drone's odometry: its estimate of where it is and how fast it moves. |
+| bridge | The `ros_gz_bridge` program. Takes each message from one side, converts it to the other side's type, and re-sends it. |
+| Twist | Message type for a velocity: linear (x, y, z) and angular (turn) parts. |
+| Odometry | Message type for a position plus velocity estimate. |
+| `/X3/gazebo/command/twist` | Gazebo topic the X3 velocity controller listens on. Named by the world file; it is what Step 6 published to. |
+| `/model/x3/odometry` | Gazebo topic where the simulator reports X3's position and speed. Also named by the world file. |
+
+
+1. In Terminal B, start the bridge and leave it running:
+   ```bash
+   ros2 run ros_gz_bridge parameter_bridge --ros-args -p config_file:=/workspace/sim/bridge/x3.yaml
+   ```
+   It prints one `Creating ... bridge` line per topic, then waits.
+2. Open Terminal C like Step 5 (`docker ps`, `docker exec`, `source`) and list the ROS topics:
+   ```bash
+   ros2 topic list
+   ```
+   You should see `/x3/enable`, `/x3/cmd_vel` and `/x3/odom`.
+3. Arm and take off:
+   ```bash
+   ros2 topic pub --once /x3/enable std_msgs/msg/Bool "{data: true}"
+   ros2 topic pub --once /x3/cmd_vel geometry_msgs/msg/Twist "{linear: {z: 0.3}}"
+   ```
+4. After a few seconds, hover, then ask the drone where it is:
+   ```bash
+   ros2 topic pub --once /x3/cmd_vel geometry_msgs/msg/Twist "{}"
+   ros2 topic echo --once /x3/odom --field pose.pose.position
+   ```
+   `z` is the height in metres.
+5. Land, wait until X3 is on the floor, then disarm:
+   ```bash
+   ros2 topic pub --once /x3/cmd_vel geometry_msgs/msg/Twist "{linear: {z: -0.2}}"
+   ```
+   ```bash
+   ros2 topic pub --once /x3/enable std_msgs/msg/Bool "{data: false}"
+   ```
+
+### What the Commands Mean
+`ros2 topic pub` is the ROS 2 twin of `gz topic -p`: topic name, message type, then the message as YAML. `--once` means publish one message and exit. Any field you leave out is zero, which is why `"{}"` is the hover command. The two message types are standard ROS ones: a `Twist` is a velocity split into linear and angular parts, and an `Odometry` is an estimate of position and velocity. Their definitions are these short file: [Twist.msg](https://github.com/ros2/common_interfaces/blob/jazzy/geometry_msgs/msg/Twist.msg) and [Odometry.msg](https://github.com/ros2/common_interfaces/blob/jazzy/nav_msgs/msg/Odometry.msg).
+
+### Read the Config
+Open `sim/bridge/x3.yaml`. Each entry has five fields: the ROS-side name, the Gazebo-side name, the two message types, and `direction`, which is `ROS_TO_GZ`, `GZ_TO_ROS` or `BIDIRECTIONAL`. The ROS-side names (`/x3/...`) are ours to choose; the Gazebo-side names are fixed by the world file; `cmd_vel` is the name ROS programs conventionally use for a velocity command. The full list of fields is in the [ros_gz_bridge README](https://github.com/gazebosim/ros_gz/blob/ros2/ros_gz_bridge/README.md).
+
+The point of the whole step: `/x3/cmd_vel` is now a ROS 2 topic, so **any ROS 2 program that publishes a Twist to it flies the drone**.
+
+### If It Does Not Work
+> **`ros2 topic pub` just sits there** saying it is waiting for a subscriber: the bridge is not running. Check Terminal B.
+> **`ros2 topic list` shows nothing** or only `/parameter_events` and `/rosout`: Terminal C was not sourced, or the bridge is not running. Sourcing is what makes the `ros2` commands exist in a terminal, and it has to be done in every new one.
+
+---
+
+## Step 11: Your First ROS 2 Node
+
+**Where:** Terminal C (Inside Docker), with the world open in Terminal A, the bridge from Step 10 running in Terminal B, and X3 on the ground.
+
+Everything so far was typed manually. A ROS 2 program that sends those messages itself is a **node**, the "one program, one job" idea from Step 10. The repo has one whose one job is: arm X3, climb for 5 seconds, then hover.
+```bash
+python3 /workspace/sim/nodes/hover.py
+```
+
+### What You Should See
+* X3 arms and climbs for 5 seconds, then holds about 1.5 m up.
+* After 6 seconds the node prints `hovering; land with the Step 10 commands` and exits. X3 keeps hovering: Gazebo holds the last velocity command (zero) until told otherwise.
+* Land and disarm with the commands in Step 10.5.
+
+### Read the Node
+Open `sim/nodes/hover.py`. It is 50 lines, and its shape is the shape of every ROS 2 node:
+1. `class Hover(Node)` creates the node; `super().__init__("hover")` gives it its name.
+2. `create_publisher` opens the two topics from Step 10, `/x3/enable` and `/x3/cmd_vel`. The `10` at the end is the queue size, how many unsent messages to hold.
+3. `create_timer(0.1, self.tick)` makes ROS call `tick()` ten times a second.
+4. `tick()` decides what to send this time: climb for the first 50 ticks, zeros after that.
+5. `main()` initialises ROS, creates the node, and keeps it spinning so the timer fires.
+
+That is the same skeleton as the official [publisher tutorial](https://docs.ros.org/en/jazzy/Tutorials/Beginner-Client-Libraries/Writing-A-Simple-Py-Publisher-And-Subscriber.html), with a drone instead of a string message. Change the `50` to `100` and X3 climbs twice as high. Move the `0.3` from `cmd.linear.z` to `cmd.linear.x` and it goes forward instead of up. Every later node adds to this skeleton; none replaces it.
+
+### If It Does Not Work
+> **`ModuleNotFoundError: No module named 'rclpy'`:** Terminal C was not sourced. Run `source /opt/ros/jazzy/setup.bash` and try again.
+> **The node runs but X3 does not move:** the bridge is not running in Terminal B, or Gazebo is paused.
+
+---
+
+## Step 12: Hold a Height Using Feedback
+
+**Where:** Terminal C (Inside Docker), with the world open in Terminal A, the bridge from Step 10 running in Terminal B, and X3 on the ground.
+
+`hover.py` flew blind: climb for 5 seconds and hope the height is right. This node reads the drone's position back from `/x3/odom` and corrects, which is what every controller does, from this one to the real autopilot:
+```bash
+python3 /workspace/sim/nodes/altitude_hold.py
+```
+
+### What You Should See
+* Once a second the node prints the height, the target (2 m) and the climb speed it chose.
+* The climb speed starts at +0.50 m/s and shrinks as X3 gets closer, until the height reads 2.00 m and the speed reads 0.
+* It runs until you press `Ctrl+C`. X3 keeps hovering afterwards; land with Step 10.5.
+
+### Read the Node
+Open `sim/nodes/altitude_hold.py`. Compared with `hover.py`, two things are new.
+
+**1. A subscriber.** Publishing is only half of ROS 2. `create_subscription(Odometry, "/x3/odom", self.on_odom, 10)` asks ROS to call `on_odom()` whenever a position message arrives on that topic. That is how a node reads anything: it does not ask, it gets called. Sensor data, robot position, anything that streams continuously, arrives this way.
+
+**2. A feedback loop.** `tick()` computes `error = TARGET - height` and commands `speed = GAIN * error`, capped at 0.5 m/s. Far below the target: climb fast. Nearly there: climb slowly. At the target: stop. Output proportional to error is the simplest kind of feedback, a [proportional controller](https://en.wikipedia.org/wiki/Proportional_control), and it is the first thing inside every autopilot.
+
+Two numbers to play with: `TARGET` (try 1.0 or 3.0) and `GAIN` (try 3.0, and watch it overshoot and wobble before settling). Those two experiments are most of what a controls course teaches in its first week.
+
+### If It Does Not Work
+> **The node prints nothing:** it has not received a position yet. Check the bridge is running and that `ros2 topic echo --once /x3/odom` shows data.
+> **X3 climbs past the target and keeps going:** `GAIN` is negative or the bridge is sending stale data. Reset both numbers to the values in the file.
+
 ---
 
 ## First-Flight Checklist
@@ -323,6 +498,10 @@ Complete these milestones to verify your setup works:
 - [ ] X3 turns and stops
 - [ ] X3 lands safely before its motors are disabled
 - [ ] A saved world file (`my_world.sdf`) reopens properly
+- [ ] `fly_x3.sh` completes a full flight and X3 ends on the floor with motors off
+- [ ] X3 takes off from a `ros2 topic pub` command and `/x3/odom` reports its height
+- [ ] `hover.py` takes X3 off and leaves it hovering
+- [ ] `altitude_hold.py` reports `height 2.00 m` and holds there
 
 **Need help?** Message a team lead with the **step number** that failed and copy-paste the exact terminal error. If you modified flight behavior, include a short screen recording.
 

@@ -1,0 +1,34 @@
+# x3.yaml - which Gazebo topics to expose to ROS 2, and under what names.
+#
+# Gazebo and ROS 2 each have their own topic system; they do not see each
+# other. The ros_gz_bridge program reads this list and copies messages
+# across, converting the type on the way. Start it with (Terminal B):
+#   ros2 run ros_gz_bridge parameter_bridge --ros-args -p config_file:=/workspace/sim/bridge/x3.yaml
+#
+# Each entry: the name on the ROS side (our choice), the name on the
+# Gazebo side (fixed by the world file), the two message types, and
+# which way messages flow.
+#
+# Field reference: https://github.com/gazebosim/ros_gz/blob/ros2/ros_gz_bridge/README.md
+# Background:      https://gazebosim.org/docs/harmonic/ros2_integration/
+
+# Arm / disarm. ROS publishes, Gazebo listens.
+- ros_topic_name: "/x3/enable"
+  gz_topic_name: "/X3/enable"
+  ros_type_name: "std_msgs/msg/Bool"
+  gz_type_name: "gz.msgs.Boolean"
+  direction: ROS_TO_GZ
+
+# Velocity command. "cmd_vel" is the usual ROS name for this.
+- ros_topic_name: "/x3/cmd_vel"
+  gz_topic_name: "/X3/gazebo/command/twist"
+  ros_type_name: "geometry_msgs/msg/Twist"
+  gz_type_name: "gz.msgs.Twist"
+  direction: ROS_TO_GZ
+
+# Where the drone is and how fast it moves. Gazebo publishes, ROS listens.
+- ros_topic_name: "/x3/odom"
+  gz_topic_name: "/model/x3/odometry"
+  ros_type_name: "nav_msgs/msg/Odometry"
+  gz_type_name: "gz.msgs.Odometry"
+  direction: GZ_TO_ROS

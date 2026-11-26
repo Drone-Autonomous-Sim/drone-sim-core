@@ -67,3 +67,6 @@ IDEs and Editors
 *.swp
 *.swo
 *~
+# Downloaded simulation world (README Step 4)
+
+sim/worlds/multicopter_velocity_control.sdf
